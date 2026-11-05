@@ -1,0 +1,1434 @@
+<title>زيمارا للفوترة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an accounting workspace — fixed navigation rail on the right (RTL), working sheet on the left; on phones the rail becomes a scrollable strip */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --sunk:#eaeeec; --fg:#152120; --muted:#5d6b69; --line:#d8dfdc;
+  --accent:#0c5a53; --accent-fg:#ffffff; --accent-soft:#dfeeea;
+  --gold:#94650f; --gold-soft:#f7eedb; --bad:#a3352b; --bad-soft:#f8e4e1; --ok:#22693a; --ok-soft:#e1f1e5; --info:#2d5a8a; --info-soft:#e3ecf6;
+  --display:"Readex Pro","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --radius:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#161f1e; --sunk:#1c2726; --fg:#e2eae8; --muted:#97a6a3; --line:#2a3735;
+  --accent:#4fb8ab; --accent-fg:#06201d; --accent-soft:#1a3330;
+  --gold:#d8b062; --gold-soft:#30281a; --bad:#ef8c80; --bad-soft:#3a211e; --ok:#79cc8f; --ok-soft:#1b3123; --info:#8db7e6; --info-soft:#1c2a3a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#161f1e; --sunk:#1c2726; --fg:#e2eae8; --muted:#97a6a3; --line:#2a3735;
+  --accent:#4fb8ab; --accent-fg:#06201d; --accent-soft:#1a3330;
+  --gold:#d8b062; --gold-soft:#30281a; --bad:#ef8c80; --bad-soft:#3a211e; --ok:#79cc8f; --ok-soft:#1b3123; --info:#8db7e6; --info-soft:#1c2a3a; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.7}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{direction:rtl;display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+.nav{background:var(--surface);border-inline-end:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 18px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:18px}
+.brand b{font-family:var(--display);font-size:1.15rem;display:block;line-height:1.2}
+.brand small{color:var(--muted);font-size:.75rem}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;color:var(--fg);text-decoration:none;font-size:.95rem;white-space:nowrap}
+.nav a svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
+.nav a:hover{background:var(--sunk)}
+.nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav .sep{height:1px;background:var(--line);margin:10px 6px}
+.nav .foot{margin-top:auto;padding:12px 8px 0;font-size:.8rem;color:var(--muted)}
+.main{min-width:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 60px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:18px 14px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.top h1{font-family:var(--display);font-size:1.4rem;margin:0;font-weight:600;text-wrap:balance}
+.top .spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;padding:2px 10px;border-radius:99px;background:var(--sunk);color:var(--muted);white-space:nowrap;font-weight:500}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.warn{background:var(--gold-soft);color:var(--gold)}.pill.info{background:var(--info-soft);color:var(--info)}
+.pill.acc{background:var(--accent-soft);color:var(--accent)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
+.pill.plain::before{display:none}
+.wrap{max-width:1180px}
+h2{font-family:var(--display);font-size:1.12rem;margin:0 0 12px;font-weight:600}
+h3{font-family:var(--display);font-size:1rem;margin:0 0 8px;font-weight:600}
+p{margin:6px 0}
+.muted{color:var(--muted)}.small{font-size:.85rem}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;min-width:0}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+.homegrid{grid-template-columns:minmax(0,1.75fr) minmax(280px,1fr);align-items:start}
+@media (max-width:1100px){.homegrid{grid-template-columns:minmax(0,1fr)}}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kpi .label{color:var(--muted);font-size:.85rem}
+.kpi .value{font-family:var(--mono);font-size:1.55rem;font-variant-numeric:tabular-nums;direction:ltr;text-align:right;margin-top:2px}
+.kpi .hint{font-size:.8rem;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:7px;cursor:pointer;font-weight:500;font-size:.92rem;text-decoration:none;color:var(--fg);white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+label.f span.req::after{content:" *";color:var(--bad)}
+input.in,select.in,textarea.in{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 10px;color:var(--fg);width:100%;min-width:0;font-size:.95rem}
+textarea.in{resize:vertical;min-height:70px}
+input.in:focus,select.in:focus,textarea.in:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:start;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.8rem;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--sunk)}
+td.wrap-cell{white-space:normal;min-width:160px}
+.empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty h3{color:var(--fg)}
+.notice{border-radius:var(--radius);padding:12px 16px;border:1px solid var(--line);background:var(--surface);font-size:.92rem}
+.notice.warn{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 30%,transparent)}
+.notice.bad{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 30%,transparent)}
+.notice.ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.notice.info{background:var(--info-soft);border-color:color-mix(in srgb,var(--info) 30%,transparent)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks .ic{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:700;margin-top:2px}
+.ic.e{background:var(--bad-soft);color:var(--bad)}.ic.w{background:var(--gold-soft);color:var(--gold)}.ic.o{background:var(--ok-soft);color:var(--ok)}.ic.p{background:var(--sunk);color:var(--muted)}
+.code{font-family:var(--mono);font-size:.74rem;color:var(--muted);direction:ltr;unicode-bidi:isolate}
+pre.xml{direction:ltr;text-align:left;font-family:var(--mono);font-size:.74rem;background:var(--sunk);border:1px solid var(--line);border-radius:7px;padding:12px;max-height:380px;overflow:auto;white-space:pre;margin:0}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;font-size:.88rem}
+.bar .track{grid-column:1/-1;height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:99px}
+.lines{display:flex;flex-direction:column;gap:10px}
+.line{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,1.3fr) auto;gap:8px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.line .reason,.line .name{grid-column:1/-1}
+.line .lt{grid-column:1/-1;display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted)}
+@media (max-width:760px){.line{grid-template-columns:1fr 1fr}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:3px;background:var(--sunk);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.9rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.sum{display:grid;grid-template-columns:1fr auto;gap:4px 16px;font-size:.92rem}
+.sum .t{font-weight:600;font-size:1.05rem;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.ai{background:linear-gradient(0deg,var(--accent-soft),var(--accent-soft));border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:var(--radius);padding:14px 16px}
+.ai h3{display:flex;align-items:center;gap:8px;color:var(--accent)}
+.ai h3 svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
+/* modal */
+[hidden]{display:none!important}
+#modal{position:fixed;inset:0;z-index:50;background:rgba(10,20,18,.45);display:flex;justify-content:center;align-items:flex-start;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 24px max(12px,env(safe-area-inset-left,0px))}
+.sheet{background:var(--bg);border-radius:12px;width:100%;max-width:1060px;direction:rtl;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.sheet-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);border-radius:12px 12px 0 0;z-index:2}
+.sheet-body{padding:18px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+@media (max-width:900px){.sheet-body{grid-template-columns:minmax(0,1fr)}}
+/* invoice paper */
+.paper{background:#fff;color:#16201f;border-radius:6px;border:1px solid #d9dfdc;padding:26px;font-size:.88rem;min-width:0}
+.paper .ph{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2px solid #0c5a53;padding-bottom:14px}
+.paper h2{color:#0c5a53;font-size:1.25rem;margin:0}
+.paper .en{direction:ltr;color:#5d6b69;font-size:.8rem}
+.paper .parties{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0}
+.paper .pbox{background:#f3f6f5;border-radius:6px;padding:10px 12px}
+.paper .pbox b{display:block;color:#0c5a53;font-size:.8rem;margin-bottom:4px}
+.paper table th{background:#eef3f1;color:#4b5957}
+.paper table td,.paper table th{border-bottom:1px solid #e3e8e6}
+.paper .totals{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:14px;align-items:flex-end}
+.paper .qr{background:#fff;padding:4px;border:1px solid #e3e8e6;border-radius:6px;width:150px;height:150px}
+.paper .qr svg{width:100%;height:100%;display:block}
+.paper .sum{min-width:250px;color:#16201f}
+.paper .sum .t{border-color:#d9dfdc}
+.paper .stamp{font-size:.72rem;color:#5d6b69;margin-top:14px;border-top:1px dashed #d9dfdc;padding-top:10px;direction:ltr;text-align:left;word-break:break-all;font-family:var(--mono)}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:.84rem}
+.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-all}
+/* chat */
+.chat{display:flex;flex-direction:column;gap:12px;min-height:300px}
+.msg{max-width:min(720px,92%);padding:10px 14px;border-radius:12px;white-space:pre-wrap;line-height:1.75}
+.msg.u{align-self:flex-start;background:var(--accent);color:var(--accent-fg);border-end-start-radius:4px}
+.msg.a{align-self:flex-end;background:var(--surface);border:1px solid var(--line);border-end-end-radius:4px}
+.msg.tool{align-self:flex-end;font-size:.8rem;color:var(--muted);background:transparent;padding:0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:.85rem;cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+/* plans */
+.plan{display:flex;flex-direction:column;gap:8px}
+.plan.hot{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.plan .price{font-family:var(--mono);font-size:1.8rem;direction:ltr;text-align:right}
+.plan ul{margin:0;padding-inline-start:18px;font-size:.88rem}
+.plan li{margin:3px 0}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:60;direction:rtl;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(92vw,520px)}
+.toast{background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:9px;font-size:.92rem;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast.bad{background:var(--bad);color:#fff}
+.steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;align-items:flex-start;font-size:.92rem}
+.skel{height:14px;border-radius:6px;background:var(--sunk);margin:8px 0}
+@media (max-width:820px){
+  #app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;flex-direction:row;overflow-x:auto;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));border-inline-end:0;border-bottom:1px solid var(--line);z-index:20;gap:2px}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--surface)}
+  .brand{padding:0 4px 0 10px}.brand small{display:none}
+  .nav .sep,.nav .foot{display:none}
+  .nav a{padding:6px 10px;font-size:.88rem}
+  .top h1{font-size:1.2rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<div id="app">
+  <nav class="nav" id="nav" aria-label="القائمة الرئيسية"></nav>
+  <div class="main">
+    <header class="top"><h1 id="pageTitle">زيمارا</h1><span class="spacer"></span><span id="envPills" class="row"></span></header>
+    <div class="wrap" id="view"><div class="card"><div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:70%"></div></div></div>
+  </div>
+</div>
+<div id="modal" hidden></div>
+<div id="toast" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script>
+/* ===== Zimara ZATCA engine: SHA-256, secp256k1 ECDSA, TLV QR, UBL 2.1 XML, validation ===== */
+var ZE = (function () {
+  var enc = new TextEncoder();
+  function utf8(s) { return enc.encode(s); }
+  function concat(arrs) {
+    var n = 0; arrs.forEach(function (a) { n += a.length; });
+    var out = new Uint8Array(n), o = 0;
+    arrs.forEach(function (a) { out.set(a, o); o += a.length; });
+    return out;
+  }
+  function b64(bytes) {
+    var s = ""; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+  function unb64(str) {
+    var s = atob(str), out = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+    return out;
+  }
+  function hex(bytes) { return Array.prototype.map.call(bytes, function (b) { return b.toString(16).padStart(2, "0"); }).join(""); }
+  function unhex(h) { var out = new Uint8Array(h.length / 2); for (var i = 0; i < out.length; i++) out[i] = parseInt(h.substr(i * 2, 2), 16); return out; }
+
+  /* --- SHA-256 --- */
+  var K = new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+  function sha256(msg) {
+    if (typeof msg === "string") msg = utf8(msg);
+    var l = msg.length, nBlocks = ((l + 9 + 63) >> 6);
+    var buf = new Uint8Array(nBlocks * 64); buf.set(msg); buf[l] = 0x80;
+    var bits = l * 8, dv = new DataView(buf.buffer);
+    dv.setUint32(buf.length - 4, bits >>> 0); dv.setUint32(buf.length - 8, Math.floor(bits / 4294967296));
+    var H = new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]);
+    var W = new Uint32Array(64);
+    for (var b = 0; b < nBlocks; b++) {
+      for (var t = 0; t < 16; t++) W[t] = dv.getUint32(b * 64 + t * 4);
+      for (t = 16; t < 64; t++) {
+        var x = W[t - 15], y = W[t - 2];
+        var s0 = ((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3);
+        var s1 = ((y >>> 17) | (y << 15)) ^ ((y >>> 19) | (y << 13)) ^ (y >>> 10);
+        W[t] = (W[t - 16] + s0 + W[t - 7] + s1) >>> 0;
+      }
+      var a = H[0], c1 = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (t = 0; t < 64; t++) {
+        var S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        var ch = (e & f) ^ (~e & g);
+        var t1 = (h + S1 + ch + K[t] + W[t]) >>> 0;
+        var S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        var mj = (a & c1) ^ (a & c) ^ (c1 & c);
+        var t2 = (S0 + mj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = c1; c1 = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + c1) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    var out = new Uint8Array(32), odv = new DataView(out.buffer);
+    for (var i = 0; i < 8; i++) odv.setUint32(i * 4, H[i]);
+    return out;
+  }
+
+  /* --- secp256k1 ECDSA --- */
+  var P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2Fn;
+  var N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141n;
+  var G = { x: 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798n, y: 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8n };
+  function mod(a, m) { var r = a % m; return r >= 0n ? r : r + m; }
+  function inv(a, m) {
+    var lm = 1n, hm = 0n, low = mod(a, m), high = m;
+    while (low > 1n) { var r = high / low; var nm = hm - lm * r, nw = high - low * r; hm = lm; lm = nm; high = low; low = nw; }
+    return mod(lm, m);
+  }
+  function add(p, q) {
+    if (!p) return q; if (!q) return p;
+    var l;
+    if (p.x === q.x) {
+      if (mod(p.y + q.y, P) === 0n) return null;
+      l = mod(3n * p.x * p.x * inv(2n * p.y, P), P);
+    } else {
+      l = mod((q.y - p.y) * inv(q.x - p.x, P), P);
+    }
+    var x = mod(l * l - p.x - q.x, P);
+    return { x: x, y: mod(l * (p.x - x) - p.y, P) };
+  }
+  function mul(k, pt) {
+    var r = null, a = pt;
+    while (k > 0n) { if (k & 1n) r = add(r, a); a = add(a, a); k >>= 1n; }
+    return r;
+  }
+  function toBig(bytes) { return bytes.length ? BigInt("0x" + hex(bytes)) : 0n; }
+  function to32(n) { return unhex(n.toString(16).padStart(64, "0")); }
+  function randScalar() {
+    for (;;) {
+      var b = new Uint8Array(32); crypto.getRandomValues(b);
+      var k = toBig(b); if (k > 0n && k < N) return k;
+    }
+  }
+  function keygen() {
+    var d = randScalar(), Q = mul(d, G);
+    return { priv: hex(to32(d)), pubX: hex(to32(Q.x)), pubY: hex(to32(Q.y)) };
+  }
+  /* ECDSA with SHA-256 over msg (bytes) */
+  function sign(msg, privHex) {
+    var d = BigInt("0x" + privHex), z = toBig(sha256(msg));
+    for (;;) {
+      var k = randScalar(), R = mul(k, G), r = mod(R.x, N);
+      if (r === 0n) continue;
+      var s = mod(inv(k, N) * (z + r * d), N);
+      if (s === 0n) continue;
+      if (s > N / 2n) s = N - s;
+      return derSig(r, s);
+    }
+  }
+  function verify(msg, sigDer, pubX, pubY) {
+    var rs = parseDerSig(sigDer); if (!rs) return false;
+    var r = rs[0], s = rs[1];
+    if (r <= 0n || r >= N || s <= 0n || s >= N) return false;
+    var z = toBig(sha256(msg)), w = inv(s, N);
+    var X = add(mul(mod(z * w, N), G), mul(mod(r * w, N), { x: BigInt("0x" + pubX), y: BigInt("0x" + pubY) }));
+    return !!X && mod(X.x, N) === r;
+  }
+  function derInt(n) {
+    var b = unhex(n.toString(16).padStart(64, "0")), i = 0;
+    while (i < b.length - 1 && b[i] === 0) i++;
+    b = b.slice(i);
+    if (b[0] & 0x80) b = concat([new Uint8Array([0]), b]);
+    return concat([new Uint8Array([0x02, b.length]), b]);
+  }
+  function derSig(r, s) {
+    var body = concat([derInt(r), derInt(s)]);
+    return concat([new Uint8Array([0x30, body.length]), body]);
+  }
+  function parseDerSig(b) {
+    if (b[0] !== 0x30) return null;
+    var i = 2; if (b[i] !== 0x02) return null;
+    var lr = b[i + 1], r = toBig(b.slice(i + 2, i + 2 + lr)); i = i + 2 + lr;
+    if (b[i] !== 0x02) return null;
+    var ls = b[i + 1], s = toBig(b.slice(i + 2, i + 2 + ls));
+    return [r, s];
+  }
+  function spki(pubX, pubY) {
+    return concat([unhex("3056301006072a8648ce3d020106052b8104000a034200"), new Uint8Array([4]), unhex(pubX), unhex(pubY)]);
+  }
+
+  /* --- TLV QR (ZATCA tags 1-9) --- */
+  function tlv(tag, value) {
+    var v = typeof value === "string" ? utf8(value) : value;
+    var len = v.length;
+    var lenBytes = len < 128 ? new Uint8Array([len]) : (len < 256 ? new Uint8Array([0x81, len]) : new Uint8Array([0x82, len >> 8, len & 255]));
+    return concat([new Uint8Array([tag]), lenBytes, v]);
+  }
+  function qr(fields) {
+    var parts = [
+      tlv(1, fields.sellerName), tlv(2, fields.vat), tlv(3, fields.timestamp),
+      tlv(4, fields.total), tlv(5, fields.vatTotal), tlv(6, fields.hash),
+      tlv(7, fields.signature), tlv(8, fields.publicKey)
+    ];
+    if (fields.certSignature) parts.push(tlv(9, fields.certSignature));
+    return b64(concat(parts));
+  }
+  function parseQr(base64) {
+    var b = unb64(base64), i = 0, out = {};
+    while (i < b.length) {
+      var tag = b[i], len = b[i + 1], off = 2;
+      if (len === 0x81) { len = b[i + 2]; off = 3; } else if (len === 0x82) { len = (b[i + 2] << 8) | b[i + 3]; off = 4; }
+      out[tag] = b.slice(i + off, i + off + len); i += off + len;
+    }
+    return out;
+  }
+
+  /* --- money and tax maths --- */
+  function r2(n) { return Math.round((Number(n) + Number.EPSILON) * 100) / 100; }
+  function f2(n) { return r2(n).toFixed(2); }
+  var RATES = { S: 0.15, Z: 0, E: 0, O: 0 };
+  function totals(lines) {
+    var subs = {}, lineExt = 0, out = [];
+    (lines || []).forEach(function (ln) {
+      var net = r2(Number(ln.qty || 0) * Number(ln.price || 0) - Number(ln.discount || 0));
+      var cat = ln.cat || "S", rate = RATES[cat] == null ? 0.15 : RATES[cat];
+      var vat = r2(net * rate);
+      lineExt = r2(lineExt + net);
+      var key = cat + "|" + (cat === "S" ? "" : (ln.reason || ""));
+      if (!subs[key]) subs[key] = { cat: cat, rate: rate, reason: cat === "S" ? "" : (ln.reason || ""), taxable: 0, tax: 0 };
+      subs[key].taxable = r2(subs[key].taxable + net);
+      out.push({ net: net, vat: vat, gross: r2(net + vat), rate: rate, cat: cat });
+    });
+    var vatTotal = 0;
+    Object.keys(subs).forEach(function (k) { subs[k].tax = r2(subs[k].taxable * subs[k].rate); vatTotal = r2(vatTotal + subs[k].tax); });
+    return { lines: out, subtotals: Object.keys(subs).map(function (k) { return subs[k]; }), net: lineExt, vat: vatTotal, gross: r2(lineExt + vatTotal) };
+  }
+
+  /* --- reference data --- */
+  var EXEMPTIONS = {
+    "VATEX-SA-29": "الخدمات المالية",
+    "VATEX-SA-30": "العقارات السكنية",
+    "VATEX-SA-32": "تصدير السلع",
+    "VATEX-SA-33": "تصدير الخدمات",
+    "VATEX-SA-34-1": "النقل الدولي للسلع",
+    "VATEX-SA-34-2": "النقل الدولي للركاب",
+    "VATEX-SA-35": "الأدوية والمعدات الطبية",
+    "VATEX-SA-36": "المعادن المؤهلة",
+    "VATEX-SA-EDU": "التعليم الخاص للمواطنين",
+    "VATEX-SA-HEA": "الرعاية الصحية الخاصة للمواطنين",
+    "VATEX-SA-OOS": "خارج نطاق الضريبة"
+  };
+  var CAT_NAMES = { S: "خاضع 15%", Z: "نسبة صفرية", E: "معفى", O: "خارج النطاق" };
+  var DOC = {
+    invoice: { code: "388", ar: "فاتورة", en: "Invoice" },
+    credit: { code: "381", ar: "إشعار دائن", en: "Credit Note" },
+    debit: { code: "383", ar: "إشعار مدين", en: "Debit Note" }
+  };
+  /* first PIH defined by ZATCA: base64 of SHA-256("0") hex */
+  var FIRST_PIH = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
+
+  /* --- validation --- */
+  var reVat = /^3\d{13}3$/, reBld = /^\d{4}$/, rePost = /^\d{5}$/, reCr = /^\d{10}$/;
+  function validateCompany(c) {
+    var e = [];
+    function req(v, code, msg) { if (!v || !String(v).trim()) e.push({ level: "error", code: code, msg: msg }); }
+    c = c || {};
+    req(c.nameAr, "BR-KSA-CO-1", "اسم المنشأة بالعربي مطلوب");
+    if (!reVat.test(c.vat || "")) e.push({ level: "error", code: "BR-KSA-39", msg: "الرقم الضريبي لازم يكون 15 رقم، يبدأ بـ 3 وينتهي بـ 3" });
+    if (!reCr.test(c.cr || "")) e.push({ level: "error", code: "BR-KSA-08", msg: "رقم السجل التجاري لازم يكون 10 أرقام" });
+    req(c.street, "BR-KSA-09", "اسم الشارع مطلوب");
+    if (!reBld.test(c.building || "")) e.push({ level: "error", code: "BR-KSA-37", msg: "رقم المبنى لازم يكون 4 أرقام" });
+    if (!rePost.test(c.postal || "")) e.push({ level: "error", code: "BR-KSA-66", msg: "الرمز البريدي لازم يكون 5 أرقام" });
+    req(c.city, "BR-KSA-09", "المدينة مطلوبة");
+    req(c.district, "BR-KSA-09", "الحي مطلوب");
+    return e;
+  }
+  function validateDraft(d, company, customer, original) {
+    var e = [];
+    function err(code, msg) { e.push({ level: "error", code: code, msg: msg }); }
+    function warn(code, msg) { e.push({ level: "warning", code: code, msg: msg }); }
+    if (validateCompany(company).length) err("SELLER", "بيانات منشأتك ناقصة. كمّلها من صفحة المنشأة");
+    var std = d.kind === "standard";
+    if (std) {
+      if (!customer) err("BR-KSA-42", "الفاتورة الضريبية (B2B) تحتاج عميل");
+      else {
+        if (!customer.name) err("BR-KSA-42", "اسم المشتري مطلوب في الفاتورة الضريبية");
+        if (customer.vat && !reVat.test(customer.vat)) err("BR-KSA-44", "الرقم الضريبي للمشتري غير صحيح (15 رقم يبدأ وينتهي بـ 3)");
+        if (!customer.vat && !customer.otherId) warn("BR-KSA-14", "المشتري بدون رقم ضريبي ولا سجل تجاري. الفاتورة تنقبل مع تحذير، والأفضل تحدّث بياناته");
+        if (!customer.street || !customer.city || !customer.district) err("BR-KSA-63", "عنوان المشتري (الشارع، الحي، المدينة) مطلوب في الفاتورة الضريبية");
+        if (customer.building && !reBld.test(customer.building)) err("BR-KSA-37", "رقم مبنى المشتري لازم يكون 4 أرقام");
+        if (customer.postal && !rePost.test(customer.postal)) err("BR-KSA-67", "الرمز البريدي للمشتري لازم يكون 5 أرقام");
+        if (!customer.building || !customer.postal) err("BR-KSA-63", "رقم المبنى والرمز البريدي للمشتري مطلوبين");
+      }
+      if (!d.supplyDate) err("BR-KSA-15", "تاريخ التوريد مطلوب في الفاتورة الضريبية");
+    }
+    if (!d.lines || !d.lines.length) err("BR-16", "أضف بند واحد على الأقل");
+    (d.lines || []).forEach(function (ln, i) {
+      var n = "البند " + (i + 1) + ": ";
+      if (!ln.name || !String(ln.name).trim()) err("BR-25", n + "اسم الصنف مطلوب");
+      if (!(Number(ln.qty) > 0)) err("BR-KSA-F-04", n + "الكمية لازم تكون أكبر من صفر");
+      if (!(Number(ln.price) >= 0) || ln.price === "") err("BR-27", n + "السعر لازم يكون صفر أو أكثر");
+      if (Number(ln.discount || 0) < 0) err("BR-41", n + "الخصم ما يكون سالب");
+      if (Number(ln.discount || 0) > Number(ln.qty || 0) * Number(ln.price || 0)) err("BR-41", n + "الخصم أكبر من قيمة البند");
+      if (ln.cat && ln.cat !== "S" && !ln.reason) err("BR-KSA-69", n + "البند غير الخاضع لـ 15% يحتاج سبب إعفاء");
+      if (String(ln.price).split(".")[1] && String(ln.price).split(".")[1].length > 2) warn("BR-DEC-01", n + "السعر فيه أكثر من خانتين عشريتين، بيتقرب");
+    });
+    if (d.docType !== "invoice") {
+      if (!original) err("BR-KSA-56", "الإشعار لازم يشير للفاتورة الأصلية (المادة 54 من اللائحة)");
+      if (!d.reason || !String(d.reason).trim()) err("BR-KSA-17", "سبب إصدار الإشعار مطلوب");
+      if (original && d.docType === "credit") {
+        var t = totals(d.lines).gross;
+        if (t > Number(original.totals.gross) + 0.001) warn("BR-CN-01", "مبلغ الإشعار الدائن أكبر من الفاتورة الأصلية");
+      }
+    }
+    var tt = totals(d.lines);
+    if (tt.gross < 0) err("BR-CO-25", "إجمالي المستند ما يكون سالب");
+    if (d.kind === "simplified" && tt.gross >= 1000 && !customer) warn("BR-KSA-25", "مبلغ كبير بدون اسم عميل. يُفضّل تسجيل اسم المشتري");
+    return e;
+  }
+
+  /* --- UBL 2.1 XML --- */
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function party(tag, p, isSeller) {
+    var x = [];
+    x.push("  <cac:" + tag + ">", "    <cac:Party>");
+    if (isSeller) x.push('      <cac:PartyIdentification><cbc:ID schemeID="CRN">' + esc(p.cr) + "</cbc:ID></cac:PartyIdentification>");
+    else if (p && p.otherId) x.push('      <cac:PartyIdentification><cbc:ID schemeID="CRN">' + esc(p.otherId) + "</cbc:ID></cac:PartyIdentification>");
+    if (p && (p.street || p.city)) {
+      x.push("      <cac:PostalAddress>");
+      if (p.street) x.push("        <cbc:StreetName>" + esc(p.street) + "</cbc:StreetName>");
+      if (p.building) x.push("        <cbc:BuildingNumber>" + esc(p.building) + "</cbc:BuildingNumber>");
+      if (p.district) x.push("        <cbc:CitySubdivisionName>" + esc(p.district) + "</cbc:CitySubdivisionName>");
+      if (p.city) x.push("        <cbc:CityName>" + esc(p.city) + "</cbc:CityName>");
+      if (p.postal) x.push("        <cbc:PostalZone>" + esc(p.postal) + "</cbc:PostalZone>");
+      x.push("        <cac:Country><cbc:IdentificationCode>SA</cbc:IdentificationCode></cac:Country>", "      </cac:PostalAddress>");
+    }
+    if (p && p.vat) x.push("      <cac:PartyTaxScheme><cbc:CompanyID>" + esc(p.vat) + "</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>");
+    else if (!isSeller) x.push("      <cac:PartyTaxScheme><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>");
+    var nm = isSeller ? p.nameAr : (p && p.name);
+    if (nm) x.push("      <cac:PartyLegalEntity><cbc:RegistrationName>" + esc(nm) + "</cbc:RegistrationName></cac:PartyLegalEntity>");
+    x.push("    </cac:Party>", "  </cac:" + tag + ">");
+    return x.join("\n");
+  }
+  function cat(c, rate, reason) {
+    var x = "<cbc:ID>" + c + "</cbc:ID><cbc:Percent>" + (rate * 100).toFixed(2) + "</cbc:Percent>";
+    if (c !== "S" && reason) x += "<cbc:TaxExemptionReasonCode>" + esc(reason) + "</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>" + esc(EXEMPTIONS[reason] || reason) + "</cbc:TaxExemptionReason>";
+    return x + "<cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>";
+  }
+  /* Build the hashable document (no UBLExtensions, QR reference or Signature). */
+  function buildHashXml(doc, company, customer, original) {
+    var t = doc.totals, cur = ' currencyID="SAR"';
+    var x = [];
+    x.push('<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">');
+    x.push("  <cbc:ProfileID>reporting:1.0</cbc:ProfileID>");
+    x.push("  <cbc:ID>" + esc(doc.number) + "</cbc:ID>");
+    x.push("  <cbc:UUID>" + doc.uuid + "</cbc:UUID>");
+    x.push("  <cbc:IssueDate>" + doc.issueDate + "</cbc:IssueDate>");
+    x.push("  <cbc:IssueTime>" + doc.issueTime + "</cbc:IssueTime>");
+    x.push('  <cbc:InvoiceTypeCode name="' + (doc.kind === "standard" ? "0100000" : "0200000") + '">' + DOC[doc.docType].code + "</cbc:InvoiceTypeCode>");
+    if (doc.notes) x.push('  <cbc:Note languageID="ar">' + esc(doc.notes) + "</cbc:Note>");
+    x.push("  <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>");
+    x.push("  <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>");
+    if (original) x.push("  <cac:BillingReference><cac:InvoiceDocumentReference><cbc:ID>" + esc(original.number) + "</cbc:ID></cac:InvoiceDocumentReference></cac:BillingReference>");
+    x.push("  <cac:AdditionalDocumentReference><cbc:ID>ICV</cbc:ID><cbc:UUID>" + doc.icv + "</cbc:UUID></cac:AdditionalDocumentReference>");
+    x.push('  <cac:AdditionalDocumentReference><cbc:ID>PIH</cbc:ID><cac:Attachment><cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">' + doc.pih + "</cbc:EmbeddedDocumentBinaryObject></cac:Attachment></cac:AdditionalDocumentReference>");
+    x.push(party("AccountingSupplierParty", company, true));
+    x.push(party("AccountingCustomerParty", customer, false));
+    if (doc.supplyDate) x.push("  <cac:Delivery><cbc:ActualDeliveryDate>" + doc.supplyDate + "</cbc:ActualDeliveryDate></cac:Delivery>");
+    x.push("  <cac:PaymentMeans><cbc:PaymentMeansCode>" + esc(doc.payMeans || "10") + "</cbc:PaymentMeansCode>" + (doc.reason ? "<cbc:InstructionNote>" + esc(doc.reason) + "</cbc:InstructionNote>" : "") + "</cac:PaymentMeans>");
+    x.push("  <cac:TaxTotal><cbc:TaxAmount" + cur + ">" + f2(t.vat) + "</cbc:TaxAmount></cac:TaxTotal>");
+    x.push("  <cac:TaxTotal>", "    <cbc:TaxAmount" + cur + ">" + f2(t.vat) + "</cbc:TaxAmount>");
+    t.subtotals.forEach(function (s) {
+      x.push("    <cac:TaxSubtotal><cbc:TaxableAmount" + cur + ">" + f2(s.taxable) + "</cbc:TaxableAmount><cbc:TaxAmount" + cur + ">" + f2(s.tax) + "</cbc:TaxAmount><cac:TaxCategory>" + cat(s.cat, s.rate, s.reason) + "</cac:TaxCategory></cac:TaxSubtotal>");
+    });
+    x.push("  </cac:TaxTotal>");
+    x.push("  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount" + cur + ">" + f2(t.net) + "</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount" + cur + ">" + f2(t.net) + "</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount" + cur + ">" + f2(t.gross) + "</cbc:TaxInclusiveAmount><cbc:AllowanceTotalAmount" + cur + ">0.00</cbc:AllowanceTotalAmount><cbc:PrepaidAmount" + cur + ">0.00</cbc:PrepaidAmount><cbc:PayableAmount" + cur + ">" + f2(t.gross) + "</cbc:PayableAmount></cac:LegalMonetaryTotal>");
+    doc.lines.forEach(function (ln, i) {
+      var lt = t.lines[i];
+      x.push("  <cac:InvoiceLine>");
+      x.push("    <cbc:ID>" + (i + 1) + "</cbc:ID>");
+      x.push('    <cbc:InvoicedQuantity unitCode="' + esc(ln.unit || "PCE") + '">' + Number(ln.qty).toFixed(6) + "</cbc:InvoicedQuantity>");
+      x.push("    <cbc:LineExtensionAmount" + cur + ">" + f2(lt.net) + "</cbc:LineExtensionAmount>");
+      if (Number(ln.discount || 0) > 0) x.push("    <cac:AllowanceCharge><cbc:ChargeIndicator>false</cbc:ChargeIndicator><cbc:AllowanceChargeReason>discount</cbc:AllowanceChargeReason><cbc:Amount" + cur + ">" + f2(ln.discount) + "</cbc:Amount></cac:AllowanceCharge>");
+      x.push("    <cac:TaxTotal><cbc:TaxAmount" + cur + ">" + f2(lt.vat) + "</cbc:TaxAmount><cbc:RoundingAmount" + cur + ">" + f2(lt.gross) + "</cbc:RoundingAmount></cac:TaxTotal>");
+      x.push("    <cac:Item><cbc:Name>" + esc(ln.name) + "</cbc:Name><cac:ClassifiedTaxCategory>" + cat(lt.cat, lt.rate, null) + "</cac:ClassifiedTaxCategory></cac:Item>");
+      x.push("    <cac:Price><cbc:PriceAmount" + cur + ">" + f2(ln.price) + "</cbc:PriceAmount></cac:Price>");
+      x.push("  </cac:InvoiceLine>");
+    });
+    x.push("</Invoice>");
+    return x.join("\n");
+  }
+  function insertSignatureParts(hashXml, parts) {
+    var ext = [
+      "  <ext:UBLExtensions>",
+      "    <ext:UBLExtension>",
+      "      <ext:ExtensionURI>urn:oasis:names:specification:ubl:dsig:enveloped:xades</ext:ExtensionURI>",
+      "      <ext:ExtensionContent>",
+      '        <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="signature">',
+      "          <ds:SignedInfo><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256\"></ds:SignatureMethod><ds:Reference Id=\"invoiceSignedData\" URI=\"\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"></ds:DigestMethod><ds:DigestValue>" + parts.hash + "</ds:DigestValue></ds:Reference></ds:SignedInfo>",
+      "          <ds:SignatureValue>" + parts.signature + "</ds:SignatureValue>",
+      "          <ds:KeyInfo><ds:X509Data><ds:X509Certificate>" + parts.cert + "</ds:X509Certificate></ds:X509Data></ds:KeyInfo>",
+      "        </ds:Signature>",
+      "      </ext:ExtensionContent>",
+      "    </ext:UBLExtension>",
+      "  </ext:UBLExtensions>"
+    ].join("\n");
+    var qrRef = '  <cac:AdditionalDocumentReference><cbc:ID>QR</cbc:ID><cac:Attachment><cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">' + parts.qr + "</cbc:EmbeddedDocumentBinaryObject></cac:Attachment></cac:AdditionalDocumentReference>";
+    var sig = "  <cac:Signature><cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID><cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod></cac:Signature>";
+    var lines = hashXml.split("\n");
+    var out = [lines[0], ext];
+    for (var i = 1; i < lines.length; i++) {
+      out.push(lines[i]);
+      if (lines[i].indexOf("<cbc:ID>PIH</cbc:ID>") > -1) { out.push(qrRef); out.push(sig); }
+    }
+    return out.join("\n");
+  }
+  /* The transform ZATCA applies before hashing: drop the three excluded parts. */
+  function stripForHash(xml) {
+    return xml
+      .replace(/\n\s*<ext:UBLExtensions>[\s\S]*?<\/ext:UBLExtensions>/, "")
+      .replace(/\n\s*<cac:AdditionalDocumentReference><cbc:ID>QR<\/cbc:ID>[\s\S]*?<\/cac:AdditionalDocumentReference>/, "")
+      .replace(/\n\s*<cac:Signature>[\s\S]*?<\/cac:Signature>/, "");
+  }
+  function invoiceHash(hashXml) { return b64(sha256(hashXml)); }
+
+  return {
+    utf8: utf8, b64: b64, unb64: unb64, hex: hex, unhex: unhex, sha256: sha256,
+    keygen: keygen, sign: sign, verify: verify, spki: spki, qr: qr, parseQr: parseQr,
+    r2: r2, f2: f2, totals: totals, EXEMPTIONS: EXEMPTIONS, CAT_NAMES: CAT_NAMES, DOC: DOC, FIRST_PIH: FIRST_PIH,
+    validateCompany: validateCompany, validateDraft: validateDraft,
+    buildHashXml: buildHashXml, insertSignatureParts: insertSignatureParts, stripForHash: stripForHash, invoiceHash: invoiceHash
+  };
+})();
+
+</script>
+<script>
+/* ===================== Zimara app ===================== */
+(function () {
+"use strict";
+var S = { docs: {}, mode: "loading", col: null, note: "", draft: null, ui: { q: "", ftype: "all", fstat: "all", period: "quarter" }, chat: [], chatBusy: false, pendingDraft: null, sample: null, dl: null, onboarding: null, chainResult: null };
+var LS_KEY = "zimara.v1";
+var $ = function (s, r) { return (r || document).querySelector(s); };
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+function clone(o) { return o == null ? o : JSON.parse(JSON.stringify(o)); }
+function uuid() { if (crypto.randomUUID) return crypto.randomUUID(); var b = new Uint8Array(16); crypto.getRandomValues(b); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128; var h = ZE.hex(b); return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20); }
+function rid() { return uuid().split("-")[0] + uuid().split("-")[1]; }
+function pad(n, w) { return String(n).padStart(w, "0"); }
+function money(n) { return Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function sar(n) { return '<span class="num">' + money(n) + "</span> ر.س"; }
+function riyadhNow() {
+  var p = {}; new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Riyadh", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+  var hh = p.hour === "24" ? "00" : p.hour;
+  return { date: p.year + "-" + p.month + "-" + p.day, time: hh + ":" + p.minute + ":" + p.second, ym: p.year + "-" + p.month, year: p.year };
+}
+function fmtDate(iso) { if (!iso) return "—"; var d = new Date(iso); return d.toLocaleDateString("ar-SA-u-nu-latn-ca-gregory", { year: "numeric", month: "short", day: "numeric" }); }
+function fmtDT(iso) { if (!iso) return "—"; var d = new Date(iso); return d.toLocaleString("ar-SA-u-nu-latn-ca-gregory", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Riyadh" }); }
+function toast(msg, kind) { var t = document.createElement("div"); t.className = "toast" + (kind ? " " + kind : ""); t.textContent = msg; $("#toast").appendChild(t); setTimeout(function () { t.remove(); }, 3800); }
+
+/* ---------- store ---------- */
+var chains = {};
+function persist(id) {
+  chains[id] = (chains[id] || Promise.resolve()).then(function () {
+    var data = S.docs[id];
+    if (S.mode === "db") return data === undefined ? S.col.doc(id).delete() : S.col.doc(id).set(data);
+    saveLocal();
+  }).catch(function (e) {
+    var c = e && e.code;
+    toast(c === "quota_exceeded" ? "امتلأت مساحة التخزين. احذف بيانات التجربة أو تواصل معنا" : "ما قدرت أحفظ التغيير. تأكد من الاتصال وحاول مرة ثانية", "bad");
+  });
+  return chains[id];
+}
+function put(id, data) { S.docs[id] = data; return persist(id); }
+function del(id) { delete S.docs[id]; return persist(id); }
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(S.docs)); } catch (e) { /* storage unavailable */ } }
+function loadLocal() { try { var v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : {}; } catch (e) { return {}; } }
+function useLocal(note) { S.mode = "local"; S.docs = loadLocal(); if (note) S.note = note; afterData(); }
+function company() { return S.docs.company || null; }
+function egs() { return S.docs.egs || null; }
+function list(prefix) { return Object.keys(S.docs).filter(function (k) { return k.indexOf(prefix) === 0; }).map(function (k) { var o = S.docs[k]; return Object.assign({ id: k }, o); }); }
+function customers() { return list("c_").sort(function (a, b) { return String(a.name).localeCompare(String(b.name), "ar"); }); }
+function products() { return list("p_").sort(function (a, b) { return String(a.name).localeCompare(String(b.name), "ar"); }); }
+function documents() { return list("d_").sort(function (a, b) { return b.icv - a.icv; }); }
+function auditEntries() { var all = []; list("audit_").forEach(function (a) { (a.entries || []).forEach(function (e) { all.push(e); }); }); return all.sort(function (a, b) { return a.t < b.t ? 1 : -1; }); }
+function audit(action, detail) {
+  var k = "audit_" + riyadhNow().ym, cur = clone(S.docs[k]) || { entries: [] };
+  cur.entries.push({ t: new Date().toISOString(), a: action, d: detail });
+  return put(k, cur);
+}
+
+/* ---------- derived numbers ---------- */
+function balanceOf(d) {
+  if (d.docType !== "invoice") return 0;
+  var paid = (d.payments || []).reduce(function (s, p) { return s + Number(p.amount); }, 0);
+  var adj = documents().filter(function (x) { return x.refId === d.id; }).reduce(function (s, x) { return s + (x.docType === "credit" ? -x.totals.gross : x.totals.gross); }, 0);
+  return ZE.r2(d.totals.gross + adj - paid);
+}
+function payState(d) {
+  if (d.docType !== "invoice") return null;
+  var b = balanceOf(d);
+  if (b <= 0.004) return { k: "ok", t: "مدفوعة" };
+  if ((d.payments || []).length) return { k: "warn", t: "مدفوعة جزئياً" };
+  if (d.dueDate && d.dueDate < riyadhNow().date) return { k: "bad", t: "متأخرة" };
+  return { k: "plain", t: "غير مدفوعة" };
+}
+function zatcaPill(d) {
+  var s = d.zatca && d.zatca.status;
+  if (s === "cleared") return '<span class="pill ok">معتمدة</span>';
+  if (s === "reported") return '<span class="pill ok">تمت المشاركة</span>';
+  if (s === "pending") return '<span class="pill warn">بانتظار المشاركة</span>';
+  return '<span class="pill bad">مرفوضة</span>';
+}
+function docLabel(d) { var t = ZE.DOC[d.docType].ar; if (d.docType === "invoice") t = d.kind === "standard" ? "فاتورة ضريبية" : "فاتورة مبسطة"; return t; }
+function inPeriod(iso, period) {
+  var n = riyadhNow(), y = Number(n.year), m = Number(n.ym.slice(5));
+  var dy = Number(iso.slice(0, 4)), dm = Number(iso.slice(5, 7));
+  if (period === "month") return dy === y && dm === m;
+  if (period === "year") return dy === y;
+  return dy === y && Math.ceil(dm / 3) === Math.ceil(m / 3);
+}
+function vatSummary(period) {
+  var rows = { S: { base: 0, vat: 0 }, Z: { base: 0, vat: 0 }, E: { base: 0, vat: 0 }, O: { base: 0, vat: 0 } }, adj = { base: 0, vat: 0 }, count = 0;
+  documents().forEach(function (d) {
+    if (!inPeriod(d.issueDate, period)) return;
+    count++;
+    d.totals.subtotals.forEach(function (s) {
+      if (d.docType === "credit") { adj.base = ZE.r2(adj.base - s.taxable); adj.vat = ZE.r2(adj.vat - s.tax); }
+      else { rows[s.cat].base = ZE.r2(rows[s.cat].base + s.taxable); rows[s.cat].vat = ZE.r2(rows[s.cat].vat + s.tax); }
+    });
+  });
+  return { rows: rows, adj: adj, outputVat: ZE.r2(rows.S.vat + adj.vat), count: count };
+}
+function sigKeys() { var e = egs(); return e ? [{ pubX: e.pubX, pubY: e.pubY }].concat(e.prevKeys || []) : []; }
+function verifySig(d) { return sigKeys().some(function (k) { return ZE.verify(ZE.unb64(d.hash), ZE.unb64(d.sig), k.pubX, k.pubY); }); }
+function go(h, then) {
+  if (location.hash.replace("#", "") === h) { S.rendered = null; renderView(); if (then) then(); }
+  else { S.after = then || null; location.hash = h; }
+}
+
+/* ---------- ZATCA: onboarding ---------- */
+function sampleCustomer() { return { name: "عميل اختبار الامتثال", vat: "399999999900003", otherId: "1010999999", street: "طريق الملك عبدالعزيز", building: "1111", postal: "11564", city: "الرياض", district: "الملز" }; }
+function buildSigned(doc, comp, cust, original, key) {
+  var hx = ZE.buildHashXml(doc, comp, cust, original ? { number: original.number } : null);
+  var hash = ZE.invoiceHash(hx);
+  var sig = ZE.sign(ZE.unb64(hash), key.priv);
+  var q = ZE.qr({
+    sellerName: comp.nameAr, vat: comp.vat, timestamp: doc.issueDate + "T" + doc.issueTime,
+    total: ZE.f2(doc.totals.gross), vatTotal: ZE.f2(doc.totals.vat), hash: hash, signature: ZE.b64(sig),
+    publicKey: ZE.spki(key.pubX, key.pubY), certSignature: doc.kind === "simplified" && key.certSig ? ZE.unb64(key.certSig) : null
+  });
+  var xml = ZE.insertSignatureParts(hx, { hash: hash, signature: ZE.b64(sig), cert: key.cert || "", qr: q });
+  return { hx: hx, hash: hash, sig: ZE.b64(sig), qr: q, xml: xml };
+}
+function makeCert(comp, key, serial, env) {
+  var ca = ZE.keygen();
+  var now = new Date(), exp = new Date(now.getTime() + 365 * 864e5);
+  var body = { v: 3, env: env, issuer: "CN=Zimara Simulation CA (not ZATCA)", subject: "CN=" + serial + ", O=" + comp.nameAr + ", OU=" + comp.cr + ", C=SA, UID=" + comp.vat, publicKey: ZE.b64(ZE.spki(key.pubX, key.pubY)), notBefore: now.toISOString(), notAfter: exp.toISOString() };
+  var cert = ZE.b64(ZE.utf8(JSON.stringify(body)));
+  var certSig = ZE.b64(ZE.sign(ZE.utf8(cert), ca.priv));
+  return { cert: cert, certSig: certSig, notAfter: exp.toISOString() };
+}
+function complianceSuite(comp, key) {
+  var cust = sampleCustomer(), n = riyadhNow(), results = [], pih = ZE.FIRST_PIH;
+  var types = [["standard", "invoice", "فاتورة ضريبية"], ["standard", "credit", "إشعار دائن ضريبي"], ["standard", "debit", "إشعار مدين ضريبي"], ["simplified", "invoice", "فاتورة مبسطة"], ["simplified", "credit", "إشعار دائن مبسط"], ["simplified", "debit", "إشعار مدين مبسط"]];
+  types.forEach(function (t, i) {
+    var lines = [{ name: "صنف اختبار", qty: 2, price: 100, discount: 0, cat: "S", unit: "PCE" }, { name: "خدمة مالية", qty: 1, price: 50, discount: 0, cat: "E", reason: "VATEX-SA-29", unit: "PCE" }];
+    var doc = { number: "CMP-" + (i + 1), uuid: uuid(), issueDate: n.date, issueTime: n.time, kind: t[0], docType: t[1], icv: i + 1, pih: pih, supplyDate: n.date, payMeans: "10", reason: t[1] === "invoice" ? "" : "اختبار امتثال", lines: lines };
+    doc.totals = ZE.totals(lines);
+    var original = t[1] === "invoice" ? null : { number: "CMP-" + (t[0] === "standard" ? 1 : 4), totals: { gross: 1e9 } };
+    var issues = ZE.validateDraft(doc, comp, t[0] === "standard" ? cust : null, original).filter(function (e) { return e.level === "error"; });
+    var s = buildSigned(doc, comp, t[0] === "standard" ? cust : null, original, key);
+    var ok = !issues.length && ZE.stripForHash(s.xml) === s.hx && ZE.verify(ZE.unb64(s.hash), ZE.unb64(s.sig), key.pubX, key.pubY);
+    results.push({ name: t[2], ok: ok, issues: issues });
+    pih = s.hash;
+  });
+  return results;
+}
+function onboardCore(otp) {
+  var comp = company(), prev = egs();
+  var key = ZE.keygen();
+  var serial = "1-Zimara|2-1.0|3-" + uuid();
+  var compCert = makeCert(comp, key, serial, "compliance");
+  var withCert = Object.assign({}, key, compCert);
+  var checks = complianceSuite(comp, withCert);
+  var prodCert = makeCert(comp, key, serial, "production");
+  var rec = {
+    serial: serial, priv: key.priv, pubX: key.pubX, pubY: key.pubY, cert: prodCert.cert, certSig: prodCert.certSig, expiresAt: prodCert.notAfter,
+    onboardedAt: new Date().toISOString(), otpLast2: String(otp).slice(-2),
+    prevKeys: prev ? (prev.prevKeys || []).concat([{ pubX: prev.pubX, pubY: prev.pubY }]) : [], icv: prev ? prev.icv : 0, lastHash: prev ? prev.lastHash : ZE.FIRST_PIH, seq: prev ? prev.seq : { INV: 0, SIN: 0, CRN: 0, DBN: 0 }
+  };
+  return { rec: rec, checks: checks };
+}
+async function runOnboarding(otp) {
+  var steps = [
+    "توليد المفتاح الخاص (secp256k1) داخل خزنة النظام",
+    "إنشاء طلب الشهادة CSR ببيانات المنشأة",
+    "طلب شهادة الامتثال (Compliance CSID)",
+    "فحوصات الامتثال على 6 أنواع مستندات",
+    "طلب شهادة الإنتاج (Production CSID)"
+  ];
+  S.onboarding = { steps: steps, done: 0, checks: null, error: null };
+  renderView();
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  try {
+    for (var i = 0; i < 3; i++) { await wait(420); S.onboarding.done = i + 1; renderView(); }
+    var res = onboardCore(otp);
+    S.onboarding.checks = res.checks; await wait(500); S.onboarding.done = 4; renderView();
+    if (res.checks.some(function (c) { return !c.ok; })) throw new Error("فشل فحص امتثال");
+    await wait(450);
+    await put("egs", res.rec);
+    S.onboarding.done = 5;
+    await audit("egs.onboard", "تسجيل وحدة إصدار " + res.rec.serial.slice(-12));
+    renderView(); toast("تم تسجيل وحدة الإصدار وتفعيل الفوترة");
+  } catch (e) { S.onboarding.error = e.message || String(e); renderView(); }
+}
+
+/* ---------- ZATCA: issuing ---------- */
+function normLines(lines) {
+  return lines.map(function (l) { return { productId: l.productId || "", name: String(l.name || "").trim(), qty: Number(l.qty), price: ZE.r2(Number(l.price)), discount: ZE.r2(Number(l.discount || 0)), cat: l.cat || "S", reason: l.cat && l.cat !== "S" ? (l.reason || "") : "", unit: l.unit || "PCE" }; });
+}
+async function issue(draft) {
+  var comp = company(), e = clone(egs());
+  if (!comp || !e) throw new Error("سجّل وحدة الإصدار أول من صفحة المنشأة");
+  var cust = draft.customerId ? S.docs[draft.customerId] : null;
+  var original = draft.refId ? Object.assign({ id: draft.refId }, S.docs[draft.refId]) : null;
+  var lines = normLines(draft.lines);
+  var issues = ZE.validateDraft(Object.assign({}, draft, { lines: lines }), comp, cust, original);
+  if (issues.some(function (x) { return x.level === "error"; })) throw new Error("فيه أخطاء لازم تتصحح قبل الإصدار");
+  var n = riyadhNow();
+  var prefix = draft.docType === "credit" ? "CRN" : draft.docType === "debit" ? "DBN" : (draft.kind === "standard" ? "INV" : "SIN");
+  var seq = (e.seq[prefix] || 0) + 1, icv = e.icv + 1;
+  var doc = {
+    number: prefix + "-" + n.year + "-" + pad(seq, 5), uuid: uuid(), kind: draft.kind, docType: draft.docType, icv: icv, pih: e.lastHash,
+    issueDate: n.date, issueTime: n.time, issuedAt: new Date().toISOString(), supplyDate: draft.supplyDate || n.date, dueDate: draft.dueDate || "",
+    payMeans: draft.payMeans || "10", notes: draft.notes || "", reason: draft.docType === "invoice" ? "" : draft.reason, refId: original ? original.id : "", refNumber: original ? original.number : "",
+    customerId: draft.customerId || "", customerSnap: cust ? clone(cust) : null, lines: lines
+  };
+  doc.totals = ZE.totals(lines);
+  var s = buildSigned(doc, comp, cust, original, e);
+  doc.hash = s.hash; doc.sig = s.sig; doc.qr = s.qr; doc.xml = s.xml;
+  var warns = issues.filter(function (x) { return x.level === "warning"; }).map(function (x) { return x.code + ": " + x.msg; });
+  doc.zatca = draft.kind === "standard" ? { status: "cleared", at: new Date().toISOString(), warnings: warns, mode: "simulation" } : { status: "pending", at: null, warnings: warns, mode: "simulation" };
+  doc.payments = [];
+  e.icv = icv; e.lastHash = s.hash; e.seq[prefix] = seq;
+  var id = "d_" + pad(icv, 7);
+  await put(id, doc);
+  await put("egs", e);
+  await audit("doc.issue", doc.number + " · " + docLabel(doc) + " · " + money(doc.totals.gross) + " ر.س");
+  if (draft.kind === "simplified") setTimeout(processQueue, 2500);
+  return id;
+}
+var queueBusy = {};
+async function processQueue() {
+  var due = documents().filter(function (d) { return d.zatca && d.zatca.status === "pending" && Date.now() - Date.parse(d.issuedAt) > 2000 && !queueBusy[d.id]; });
+  for (var i = 0; i < due.length; i++) {
+    var d = due[i]; queueBusy[d.id] = true;
+    var body = clone(S.docs[d.id]); body.zatca.status = "reported"; body.zatca.at = new Date().toISOString();
+    await put(d.id, body);
+    await audit("zatca.report", d.number + " · تمت المشاركة مع المنصة (محاكاة)");
+  }
+  if (due.length) renderView();
+}
+function verifyChain(docsAsc, key, mutateIcv) {
+  var prev = ZE.FIRST_PIH, out = { ok: true, checked: 0, problems: [] };
+  docsAsc.forEach(function (d) {
+    var xml = d.xml;
+    if (mutateIcv === d.icv) xml = xml.replace(/<cbc:PayableAmount currencyID="SAR">[^<]+</, '<cbc:PayableAmount currencyID="SAR">1.00<');
+    var h = ZE.invoiceHash(ZE.stripForHash(xml));
+    out.checked++;
+    if (h !== d.hash) { out.ok = false; out.problems.push(d.number + ": محتوى الفاتورة لا يطابق البصمة المخزنة (تلاعب)"); }
+    if (d.pih !== prev) { out.ok = false; out.problems.push(d.number + ": السلسلة مقطوعة (بصمة الفاتورة السابقة لا تطابق)"); }
+    if (!verifySig(d)) { out.ok = false; out.problems.push(d.number + ": التوقيع الرقمي غير صحيح"); }
+    prev = d.hash;
+  });
+  return out;
+}
+
+/* ---------- demo data ---------- */
+async function loadDemo() {
+  toast("جاري تجهيز بيانات تجريبية…");
+  await put("company", { nameAr: "مؤسسة الريادة للحلول التقنية (تجريبي)", nameEn: "Al Riyada Tech Solutions (Demo)", vat: "310122393500003", cr: "1010654321", street: "طريق الملك فهد", building: "2451", postal: "12214", city: "الرياض", district: "العليا", phone: "0112345678", email: "billing@example.sa", createdAt: new Date().toISOString(), demo: true });
+  var cs = [
+    { name: "شركة الأفق للتجارة", type: "business", vat: "300456789100003", otherId: "4030123456", street: "شارع التحلية", building: "7788", postal: "23434", city: "جدة", district: "الروضة", phone: "966500000001" },
+    { name: "مجموعة نخبة الخليج", type: "business", vat: "302233445500003", otherId: "2050987654", street: "طريق الأمير محمد بن فهد", building: "3120", postal: "32241", city: "الدمام", district: "الفيصلية", phone: "966500000002" },
+    { name: "مؤسسة بناء المستقبل", type: "business", vat: "", otherId: "1010333222", street: "شارع العروبة", building: "6543", postal: "12333", city: "الرياض", district: "الورود", phone: "966500000003" },
+    { name: "أحمد سالم", type: "individual", vat: "", otherId: "", street: "", building: "", postal: "", city: "الرياض", district: "", phone: "966500000004" }
+  ];
+  var cids = [];
+  for (var i = 0; i < cs.length; i++) { var id = "c_" + rid(); cids.push(id); await put(id, cs[i]); }
+  var ps = [
+    { name: "استشارة تقنية (ساعة)", price: 450, cat: "S", unit: "HUR" },
+    { name: "اشتراك استضافة سحابية (شهري)", price: 1200, cat: "S", unit: "MON" },
+    { name: "تطوير موقع إلكتروني", price: 18000, cat: "S", unit: "PCE" },
+    { name: "جهاز نقاط بيع", price: 2300, cat: "S", unit: "PCE" },
+    { name: "تدريب فريق (يوم)", price: 3500, cat: "S", unit: "DAY" },
+    { name: "خدمة تصدير برمجيات لعميل خارجي", price: 9000, cat: "Z", reason: "VATEX-SA-33", unit: "PCE" }
+  ];
+  var pids = [];
+  for (i = 0; i < ps.length; i++) { var pid = "p_" + rid(); pids.push(pid); await put(pid, ps[i]); }
+  var ob = onboardCore("123456"); await put("egs", ob.rec);
+  await audit("egs.onboard", "تسجيل وحدة إصدار (بيانات تجريبية)");
+  function L(pi, q, disc) { var p = S.docs[pids[pi]]; return { productId: pids[pi], name: p.name, qty: q, price: p.price, discount: disc || 0, cat: p.cat, reason: p.reason || "", unit: p.unit }; }
+  var n = riyadhNow(), due = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10), past = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+  var a = await issue({ docType: "invoice", kind: "standard", customerId: cids[0], supplyDate: n.date, dueDate: due, payMeans: "30", lines: [L(2, 1), L(0, 6)], notes: "شكراً لتعاملكم معنا" });
+  var b = await issue({ docType: "invoice", kind: "standard", customerId: cids[1], supplyDate: n.date, dueDate: past, payMeans: "30", lines: [L(1, 12, 1200)] });
+  await issue({ docType: "invoice", kind: "standard", customerId: cids[2], supplyDate: n.date, dueDate: due, payMeans: "30", lines: [L(4, 2), L(0, 4)] });
+  await issue({ docType: "invoice", kind: "standard", customerId: cids[0], supplyDate: n.date, dueDate: due, payMeans: "30", lines: [L(5, 1)] });
+  await issue({ docType: "invoice", kind: "simplified", customerId: cids[3], supplyDate: n.date, payMeans: "48", lines: [L(3, 1)] });
+  await issue({ docType: "invoice", kind: "simplified", customerId: "", supplyDate: n.date, payMeans: "10", lines: [L(0, 1)] });
+  await issue({ docType: "credit", kind: "standard", customerId: cids[0], refId: a, supplyDate: n.date, payMeans: "30", reason: "خصم متفق عليه بعد التسليم", lines: [L(0, 1)] });
+  var pa = clone(S.docs[a]); pa.payments = [{ amount: 10000, method: "تحويل بنكي", at: new Date().toISOString() }]; await put(a, pa);
+  var pb = clone(S.docs[b]); pb.payments = []; await put(b, pb);
+  await audit("demo.load", "تحميل بيانات تجريبية");
+  toast("جاهز. هذي بيانات تجريبية تقدر تحذفها من صفحة المنشأة");
+  go("home");
+}
+async function resetAll() {
+  var ids = Object.keys(S.docs);
+  for (var i = 0; i < ids.length; i++) await del(ids[i]);
+  S.draft = null; S.chat = []; S.chainResult = null; S.onboarding = null;
+  toast("تمت إعادة ضبط بيئة المحاكاة");
+  go("home");
+}
+
+/* ---------- icons & nav ---------- */
+var IC = {
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  invoices: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/>',
+  new: '<path d="M12 5v14M5 12h14"/>',
+  customers: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.8 3 2.6 3.5 5.2"/>',
+  products: '<path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/>',
+  reports: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  assistant: '<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z"/>',
+  audit: '<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  company: '<path d="M4 21V5l8-2v18M12 8l8 3v10M8 9v.01M8 13v.01M8 17v.01M16 14v.01M16 18v.01M2 21h20"/>',
+  plans: '<path d="M3 7h18v10H3z"/><path d="M3 11h18M7 15h3"/>'
+};
+function icon(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + IC[n] + "</svg>"; }
+var ROUTES = [
+  ["home", "الرئيسية"], ["invoices", "المستندات"], ["new", "فاتورة جديدة"], ["customers", "العملاء"], ["products", "المنتجات والخدمات"], ["reports", "التقارير والضريبة"],
+  ["sep"], ["assistant", "المساعد الذكي"], ["audit", "سجل التدقيق"], ["company", "المنشأة والربط"], ["plans", "الباقات"]
+];
+function route() { var h = (location.hash || "").replace("#", ""); return ROUTES.some(function (r) { return r[0] === h; }) ? h : "home"; }
+function renderNav() {
+  var r = route(), html = '<div class="brand"><div class="brand-mark">ز</div><div><b>زيمارا</b><small>فوترة إلكترونية سعودية</small></div></div>';
+  ROUTES.forEach(function (x) {
+    if (x[0] === "sep") { html += '<div class="sep"></div>'; return; }
+    html += '<a href="#' + x[0] + '"' + (x[0] === r ? ' aria-current="page"' : "") + ">" + icon(x[0]) + "<span>" + x[1] + "</span></a>";
+  });
+  var c = company(); var days = c ? Math.max(0, 14 - Math.floor((Date.now() - Date.parse(c.createdAt || Date.now())) / 864e5)) : 14;
+  html += '<div class="foot">تجربة مجانية · باقي <span class="num">' + days + "</span> يوم<br>بيئة المحاكاة</div>";
+  $("#nav").innerHTML = html;
+}
+function renderPills() {
+  var p = '<span class="pill info" title="الفواتير موقّعة فعلياً، والإرسال للهيئة بالمحاكاة">بيئة المحاكاة</span>';
+  if (S.mode === "db") p += '<span class="pill ok">محفوظ في حسابك</span>';
+  else if (S.mode === "local") p += '<span class="pill warn" title="البيانات محفوظة في هذا المتصفح فقط">محفوظ في هذا المتصفح</span>';
+  else p += '<span class="pill plain">جاري التحميل…</span>';
+  var e = egs(); p += e ? '<span class="pill acc">الربط مفعّل</span>' : '<span class="pill bad">الربط غير مفعّل</span>';
+  $("#envPills").innerHTML = p;
+}
+
+/* ---------- views ---------- */
+var TITLES = { home: "الرئيسية", invoices: "المستندات", new: "فاتورة جديدة", customers: "العملاء", products: "المنتجات والخدمات", reports: "التقارير والإقرار الضريبي", assistant: "المساعد الذكي", audit: "سجل التدقيق", company: "المنشأة والربط مع الهيئة", plans: "الباقات والاشتراك" };
+var FORM_VIEWS = { new: 1, company: 1, customers: 1, products: 1, assistant: 1 };
+function renderView(force) {
+  renderNav(); renderPills();
+  var r = route();
+  $("#pageTitle").textContent = TITLES[r];
+  if (S.mode === "loading" || S.mode === "db-wait") {
+    $("#view").innerHTML = '<div class="card"><div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:70%"></div>' + (S.note === "slow" ? '<p class="muted small">التخزين ما رد للحين. تأكد من الاتصال، والصفحة بتكمل التحميل تلقائياً.</p>' : "") + "</div>";
+    return;
+  }
+  var v = VIEWS[r]();
+  $("#view").innerHTML = (S.note && S.note !== "slow" ? '<div class="notice warn" style="margin-bottom:14px">' + esc(S.note) + "</div>" : "") + v;
+  if (r === "new") afterNewRender();
+  if (r === "assistant") scrollChat();
+}
+function onData() {
+  var r = route();
+  if (FORM_VIEWS[r] && S.rendered === r) { renderNav(); renderPills(); if (r === "new") refreshNewSide(); return; }
+  S.rendered = r; renderView();
+}
+
+var VIEWS = {};
+VIEWS.home = function () {
+  var c = company();
+  if (!c) {
+    return '<div class="card" style="padding:28px"><h2 style="font-size:1.4rem">أهلاً بك في زيمارا</h2><p class="muted" style="max-width:62ch">أصدر فواتير متوافقة مع المرحلة الثانية من الفوترة الإلكترونية: موقّعة رقمياً، فيها رمز QR، ومربوطة بسلسلة ما تقبل التلاعب. ابدأ ببيانات منشأتك، أو جرّب النظام ببيانات تجريبية جاهزة.</p>' +
+      '<div class="row" style="margin-top:16px"><a class="btn primary" href="#company">ابدأ ببيانات منشأتي</a><button class="btn" data-act="demo">جرّب ببيانات تجريبية</button></div></div>' +
+      '<div class="grid g3" style="margin-top:14px">' +
+      '<div class="card"><h3>ربط مع الهيئة في دقائق</h3><p class="muted small">تدخل رمز OTP من بوابة فاتورة، والنظام يولّد المفتاح ويمرر فحوصات الامتثال الستة ويفعّل الشهادة.</p></div>' +
+      '<div class="card"><h3>مدقق قبل الإصدار</h3><p class="muted small">يفحص الفاتورة على قواعد الهيئة ويشرح كل خطأ بالعربي قبل لا توصل للمنصة.</p></div>' +
+      '<div class="card"><h3>مساعد ذكي</h3><p class="muted small">اكتب «فاتورة لشركة الأفق بست ساعات استشارة» وهو يجهز المسودة لك.</p></div></div>';
+  }
+  var docs = documents(), n = riyadhNow();
+  var month = docs.filter(function (d) { return d.issueDate.slice(0, 7) === n.ym; });
+  var sales = month.reduce(function (s, d) { return s + (d.docType === "credit" ? -d.totals.gross : d.totals.gross); }, 0);
+  var vs = vatSummary("quarter");
+  var unpaid = docs.filter(function (d) { return d.docType === "invoice"; }).reduce(function (s, d) { return s + Math.max(0, balanceOf(d)); }, 0);
+  var overdue = docs.filter(function (d) { var p = payState(d); return p && p.k === "bad"; }).length;
+  var pending = docs.filter(function (d) { return d.zatca.status === "pending"; }).length;
+  var deadline = Date.parse("2027-02-01T00:00:00+03:00"), daysLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 864e5));
+  var e = egs();
+  var h = "";
+  if (c.demo) h += '<div class="notice info" style="margin-bottom:14px">تشوف بيانات تجريبية. تقدر تمسحها وتبدأ بمنشأتك من <a href="#company">صفحة المنشأة</a>.</div>';
+  if (!e) h += '<div class="notice bad" style="margin-bottom:14px"><b>الربط مع الهيئة غير مفعّل.</b> ما تقدر تصدر فواتير قبل تسجيل وحدة الإصدار. <a href="#company">فعّل الربط الحين</a></div>';
+  h += '<div class="grid kpis">' +
+    kpi("مبيعات هذا الشهر", money(sales), "شامل الضريبة · " + month.length + " مستند") +
+    kpi("ضريبة مخرجات الربع", money(vs.outputVat), "تقديرية حسب المستندات الصادرة") +
+    kpi("مستحقات غير محصلة", money(unpaid), overdue ? overdue + " فاتورة متأخرة" : "ما فيه متأخرات") +
+    kpi("بانتظار المشاركة", String(pending), "الفواتير المبسطة تُشارك خلال 24 ساعة") + "</div>";
+  h += '<div class="grid homegrid" style="margin-top:14px">';
+  h += '<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">آخر المستندات</h2><a class="btn" href="#new">' + icon("new") + "فاتورة جديدة</a></div>" + docTable(docs.slice(0, 6), true) + "</div>";
+  h += '<div class="stack">';
+  h += '<div class="card"><h3>الموجة 25 من الربط</h3><p class="small muted">آخر موعد للمنشآت اللي تجاوزت إيراداتها 187,500 ر.س: 1 فبراير 2027</p><div class="kpi"><div class="value">' + daysLeft + ' <span style="font-size:.9rem;font-family:var(--body)">يوم متبقي</span></div></div></div>';
+  h += '<div class="card"><h3>صحة الامتثال</h3>' + (e ? '<dl class="kv"><dt>وحدة الإصدار</dt><dd class="code">' + esc(e.serial.slice(-17)) + '</dd><dt>عداد الفواتير (ICV)</dt><dd class="num">' + e.icv + '</dd><dt>صلاحية الشهادة</dt><dd>' + fmtDate(e.expiresAt) + '</dd><dt>آخر بصمة</dt><dd class="code">' + esc(e.lastHash.slice(0, 22)) + '…</dd></dl><div class="row" style="margin-top:12px"><button class="btn" data-act="chain">افحص سلامة السلسلة</button><button class="btn ghost" data-act="tamper">اختبر كشف التلاعب</button></div>' + chainResultHtml() : '<p class="muted small">فعّل الربط عشان يبدأ النظام يبني سلسلة الفواتير.</p>') + "</div>";
+  h += topCustomers(docs) + "</div></div>";
+  return h;
+};
+function kpi(label, value, hint) { return '<div class="card kpi"><div class="label">' + esc(label) + '</div><div class="value">' + esc(value) + '</div><div class="hint">' + esc(hint) + "</div></div>"; }
+function chainResultHtml() {
+  var r = S.chainResult; if (!r) return "";
+  if (r.tamper) return '<div class="notice ' + (r.ok ? "bad" : "ok") + '" style="margin-top:12px">' + (r.ok ? "ما انكشف التعديل!" : "<b>انكشف التلاعب.</b> عدّلنا مبلغ " + esc(r.target) + " في نسخة مؤقتة (بدون حفظ)، والفحص لقى:") + '<ul class="small" style="margin:6px 0 0;padding-inline-start:18px">' + r.problems.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div>";
+  return '<div class="notice ' + (r.ok ? "ok" : "bad") + '" style="margin-top:12px">' + (r.ok ? "<b>السلسلة سليمة.</b> تم فحص " + r.checked + " مستند: البصمات والتواقيع وتسلسل PIH كلها مطابقة." : "<b>فيه مشكلة:</b>") + (r.problems.length ? '<ul class="small" style="margin:6px 0 0;padding-inline-start:18px">' + r.problems.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>" : "") + "</div>";
+}
+function topCustomers(docs) {
+  var m = {};
+  docs.forEach(function (d) { if (d.docType !== "invoice") return; var n = d.customerSnap ? d.customerSnap.name : "عميل نقدي"; m[n] = (m[n] || 0) + d.totals.gross; });
+  var arr = Object.keys(m).map(function (k) { return [k, m[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
+  if (!arr.length) return "";
+  var max = arr[0][1];
+  return '<div class="card"><h3>أكبر العملاء</h3><div class="bars">' + arr.map(function (x) { return '<div class="bar"><span>' + esc(x[0]) + '</span><span class="num">' + money(x[1]) + '</span><div class="track"><div class="fill" style="width:' + Math.max(4, x[1] / max * 100) + '%"></div></div></div>'; }).join("") + "</div></div>";
+}
+function docTable(docs, compact) {
+  if (!docs.length) return '<div class="empty"><h3>ما فيه مستندات للحين</h3><p>أول فاتورة تصدرها بتظهر هنا مع حالتها في منصة فاتورة.</p><a class="btn primary" href="#new">أصدر أول فاتورة</a></div>';
+  var h = '<div class="tbl" style="margin-top:12px"><table><thead><tr><th>الرقم</th><th>النوع</th><th>العميل</th>' + (compact ? "" : "<th>التاريخ</th>") + "<th>الإجمالي</th><th>الهيئة</th>" + (compact ? "" : "<th>السداد</th>") + "</tr></thead><tbody>";
+  docs.forEach(function (d) {
+    var p = payState(d);
+    h += '<tr class="click" data-act="open" data-id="' + d.id + '" tabindex="0"><td class="num">' + esc(d.number) + "</td><td>" + docLabel(d) + "</td><td>" + esc(d.customerSnap ? d.customerSnap.name : "عميل نقدي") + "</td>" + (compact ? "" : "<td>" + fmtDate(d.issuedAt) + "</td>") + "<td>" + (d.docType === "credit" ? "−" : "") + sar(d.totals.gross) + "</td><td>" + zatcaPill(d) + "</td>" + (compact ? "" : "<td>" + (p ? '<span class="pill ' + p.k + '">' + p.t + "</span>" : "—") + "</td>") + "</tr>";
+  });
+  return h + "</tbody></table></div>";
+}
+
+VIEWS.invoices = function () {
+  var docs = documents(), q = S.ui.q.trim();
+  docs = docs.filter(function (d) {
+    if (S.ui.ftype === "standard" && !(d.docType === "invoice" && d.kind === "standard")) return false;
+    if (S.ui.ftype === "simplified" && !(d.docType === "invoice" && d.kind === "simplified")) return false;
+    if (S.ui.ftype === "notes" && d.docType === "invoice") return false;
+    if (S.ui.fstat === "unpaid") { var p = payState(d); if (!p || p.k === "ok") return false; }
+    if (S.ui.fstat === "pending" && d.zatca.status !== "pending") return false;
+    if (q && (d.number + " " + (d.customerSnap ? d.customerSnap.name : "")).indexOf(q) < 0) return false;
+    return true;
+  });
+  var seg = function (key, opts) { return '<div class="seg" role="group">' + opts.map(function (o) { return '<button type="button" data-act="filter" data-k="' + key + '" data-v="' + o[0] + '" aria-pressed="' + (S.ui[key] === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div>"; };
+  return '<div class="row" style="justify-content:space-between;margin-bottom:12px"><div class="row">' + seg("ftype", [["all", "الكل"], ["standard", "ضريبية"], ["simplified", "مبسطة"], ["notes", "إشعارات"]]) + seg("fstat", [["all", "كل الحالات"], ["unpaid", "غير مدفوعة"], ["pending", "بانتظار الهيئة"]]) + '</div><div class="row"><input class="in" id="q" data-f="search" placeholder="ابحث برقم الفاتورة أو العميل" value="' + esc(S.ui.q) + '" style="width:240px"><a class="btn primary" href="#new">' + icon("new") + "فاتورة جديدة</a></div></div>" +
+    (documents().length && !docs.length ? '<div class="card empty"><h3>ما فيه نتائج</h3><p>غيّر الفلتر أو كلمة البحث.</p></div>' : docTable(docs, false));
+};
+
+/* ----- new invoice ----- */
+function blankLine() { return { productId: "", name: "", qty: 1, price: "", discount: 0, cat: "S", reason: "", unit: "PCE" }; }
+function newDraft() { return { docType: "invoice", kind: "standard", customerId: "", supplyDate: riyadhNow().date, dueDate: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10), payMeans: "30", notes: "", reason: "", refId: "", lines: [blankLine()] }; }
+VIEWS.new = function () {
+  S.rendered = "new";
+  if (!S.draft) S.draft = newDraft();
+  var d = S.draft, c = company(), e = egs();
+  if (!c) return '<div class="card empty"><h3>كمّل بيانات منشأتك أول</h3><p>الفاتورة تحتاج اسمك ورقمك الضريبي وعنوانك.</p><a class="btn primary" href="#company">بيانات المنشأة</a></div>';
+  var orig = d.refId ? S.docs[d.refId] : null;
+  var h = "";
+  if (!e) h += '<div class="notice bad" style="margin-bottom:14px">الربط مع الهيئة غير مفعّل، فما تقدر تصدر للحين. <a href="#company">فعّل الربط</a></div>';
+  if (d.docType === "invoice") {
+    h += '<div class="ai" style="margin-bottom:14px"><h3>' + icon("assistant") + 'اكتب الفاتورة بكلامك</h3><div class="row" style="align-items:stretch"><textarea class="in" id="aiText" rows="2" style="flex:1;min-width:220px" placeholder="مثال: فاتورة ضريبية لشركة الأفق، 6 ساعات استشارة وتطوير موقع بخصم 1000"></textarea><button class="btn primary" data-act="aiFill" id="aiFillBtn">حوّلها لفاتورة</button></div><p class="small muted" id="aiNote" style="margin-bottom:0">' + (S.sample === null ? "المساعد الذكي متاح لما تفتح الصفحة في Claude وأنت مسجل دخول." : "المساعد يجهز المسودة فقط، وأنت تراجعها وتصدرها.") + "</p></div>";
+  } else {
+    h += '<div class="notice info" style="margin-bottom:14px"><b>' + ZE.DOC[d.docType].ar + "</b> على الفاتورة <span class=\"num\">" + esc(orig ? orig.number : "") + '</span>. التعديل على الفواتير الصادرة يكون بإشعار، مو بتعديل الفاتورة. <button class="btn ghost small" data-act="cancelNote">إلغاء</button></div>';
+  }
+  h += '<div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(280px,340px);align-items:start" id="newGrid"><div class="stack">';
+  h += '<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">بيانات المستند</h2>' + (d.docType === "invoice" ? '<div class="seg" role="group" aria-label="نوع الفاتورة"><button type="button" data-act="kind" data-v="standard" aria-pressed="' + (d.kind === "standard") + '">ضريبية B2B</button><button type="button" data-act="kind" data-v="simplified" aria-pressed="' + (d.kind === "simplified") + '">مبسطة B2C</button></div>' : '<span class="pill acc plain">' + (d.kind === "standard" ? "ضريبي" : "مبسط") + "</span>") + "</div>";
+  h += '<div class="fgrid">';
+  h += '<label class="f"><span' + (d.kind === "standard" ? ' class="req"' : "") + '>العميل</span><select class="in" id="f-cust" data-f="customerId"' + (d.docType !== "invoice" ? " disabled" : "") + '><option value="">' + (d.kind === "standard" ? "اختر العميل" : "عميل نقدي (بدون اسم)") + "</option>" + customers().map(function (x) { return '<option value="' + x.id + '"' + (x.id === d.customerId ? " selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") + "</select></label>";
+  h += '<label class="f"><span class="req">تاريخ التوريد</span><input class="in" type="date" id="f-supply" data-f="supplyDate" value="' + esc(d.supplyDate) + '"></label>';
+  h += '<label class="f"><span>تاريخ الاستحقاق</span><input class="in" type="date" id="f-due" data-f="dueDate" value="' + esc(d.dueDate) + '"></label>';
+  h += '<label class="f"><span>طريقة الدفع</span><select class="in" id="f-pay" data-f="payMeans">' + [["10", "نقداً"], ["30", "تحويل بنكي"], ["48", "بطاقة (مدى/ائتمان)"], ["1", "غير محدد"]].map(function (o) { return '<option value="' + o[0] + '"' + (d.payMeans === o[0] ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select></label>";
+  h += "</div>";
+  h += '<p class="small muted" style="margin-top:10px">تاريخ ووقت الإصدار يتسجل تلقائياً بتوقيت الرياض لحظة الإصدار، وما يمكن تعديله (متطلب الهيئة).' + (d.kind === "standard" ? ' <a href="#customers">أضف عميل جديد</a>' : "") + "</p>";
+  if (d.docType !== "invoice") h += '<label class="f" style="margin-top:10px"><span class="req">سبب الإشعار</span><input class="in" id="f-reason" data-f="reason" value="' + esc(d.reason) + '" placeholder="مثال: إرجاع جزء من البضاعة"></label>';
+  h += "</div>";
+  h += '<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">البنود</h2><button class="btn" data-act="addLine">' + icon("new") + 'إضافة بند</button></div><div class="lines" id="lines">' + linesHtml() + "</div></div>";
+  h += '<div class="card"><label class="f"><span>ملاحظات تظهر على الفاتورة</span><textarea class="in" id="f-notes" data-f="notes" rows="2">' + esc(d.notes) + "</textarea></label></div>";
+  h += '</div><div class="stack" style="position:sticky;top:12px" id="newSide"></div></div>';
+  return h;
+};
+function linesHtml() {
+  var d = S.draft, ps = products(), tt = ZE.totals(normLines(d.lines));
+  return d.lines.map(function (l, i) {
+    var lt = tt.lines[i] || { net: 0, vat: 0, gross: 0 };
+    return '<div class="line" data-i="' + i + '">' +
+      '<label class="f name"><span class="req">الصنف أو الخدمة</span><input class="in" id="l' + i + '-name" data-l="name" list="plist" value="' + esc(l.name) + '" placeholder="اكتب أو اختر من المنتجات"></label>' +
+      '<label class="f"><span class="req">الكمية</span><input class="in num" id="l' + i + '-qty" data-l="qty" inputmode="decimal" value="' + esc(l.qty) + '"></label>' +
+      '<label class="f"><span class="req">سعر الوحدة</span><input class="in num" id="l' + i + '-price" data-l="price" inputmode="decimal" value="' + esc(l.price) + '" placeholder="0.00"></label>' +
+      '<label class="f"><span>خصم</span><input class="in num" id="l' + i + '-disc" data-l="discount" inputmode="decimal" value="' + esc(l.discount) + '"></label>' +
+      '<label class="f"><span>الضريبة</span><select class="in" id="l' + i + '-cat" data-l="cat">' + ["S", "Z", "E", "O"].map(function (k) { return '<option value="' + k + '"' + (l.cat === k ? " selected" : "") + ">" + ZE.CAT_NAMES[k] + "</option>"; }).join("") + "</select></label>" +
+      '<button class="btn ghost" data-act="rmLine" data-i="' + i + '" aria-label="حذف البند"' + (d.lines.length < 2 ? " disabled" : "") + '><svg viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>' +
+      (l.cat !== "S" ? '<label class="f reason"><span class="req">سبب الإعفاء أو النسبة الصفرية</span><select class="in" id="l' + i + '-reason" data-l="reason"><option value="">اختر السبب</option>' + Object.keys(ZE.EXEMPTIONS).map(function (k) { return '<option value="' + k + '"' + (l.reason === k ? " selected" : "") + ">" + ZE.EXEMPTIONS[k] + " (" + k + ")</option>"; }).join("") + "</select></label>" : "") +
+      '<div class="lt"><span>الصافي ' + sar(lt.net) + "</span><span>الضريبة " + sar(lt.vat) + "</span><span>الإجمالي " + sar(lt.gross) + "</span></div></div>";
+  }).join("") + '<datalist id="plist">' + ps.map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join("") + "</datalist>";
+}
+function currentIssues() {
+  var d = S.draft, c = company(), cust = d.customerId ? S.docs[d.customerId] : null, orig = d.refId ? S.docs[d.refId] : null;
+  return ZE.validateDraft(Object.assign({}, d, { lines: normLines(d.lines) }), c, cust, orig);
+}
+function refreshNewSide() {
+  var side = $("#newSide"); if (!side || !S.draft) return;
+  var tt = ZE.totals(normLines(S.draft.lines)), issues = currentIssues();
+  var errs = issues.filter(function (x) { return x.level === "error"; }), warns = issues.filter(function (x) { return x.level === "warning"; });
+  var can = !errs.length && !!egs();
+  var h = '<div class="card"><h2>الملخص</h2><div class="sum"><span>المجموع قبل الضريبة</span>' + "<span>" + sar(tt.net) + "</span>";
+  tt.subtotals.forEach(function (s) { h += "<span class=\"muted\">" + ZE.CAT_NAMES[s.cat] + "</span><span class=\"muted\">" + sar(s.tax) + "</span>"; });
+  h += '<span>ضريبة القيمة المضافة</span><span>' + sar(tt.vat) + '</span><span class="t">الإجمالي</span><span class="t">' + sar(tt.gross) + "</span></div></div>";
+  h += '<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">مدقق الهيئة</h2>' + (errs.length ? '<span class="pill bad">' + errs.length + " خطأ</span>" : '<span class="pill ok">جاهزة</span>') + "</div>";
+  if (!issues.length) h += '<p class="small muted">الفاتورة مطابقة لكل القواعد المفحوصة.</p>';
+  else h += '<ul class="checks" style="margin-top:10px">' + errs.concat(warns).map(function (x) { return '<li><span class="ic ' + (x.level === "error" ? "e" : "w") + '">' + (x.level === "error" ? "!" : "؟") + "</span><span>" + esc(x.msg) + ' <span class="code">' + esc(x.code) + "</span></span></li>"; }).join("") + "</ul>";
+  if (issues.length && S.sample) h += '<button class="btn ghost small" style="margin-top:8px" data-act="aiExplain">اشرح لي وش أسوي</button><p class="small" id="aiExplain" style="white-space:pre-wrap"></p>';
+  h += "</div>";
+  if (S.confirmIssue) {
+    h += '<div class="card" style="border-color:var(--gold)"><h3>تأكيد الإصدار</h3><p class="small">بعد الإصدار ما تقدر تعدّل أو تحذف المستند. أي تصحيح يكون بإشعار دائن أو مدين. ' + (S.draft.kind === "standard" ? "الفاتورة الضريبية تنرسل للاعتماد قبل تسليمها للعميل." : "الفاتورة المبسطة تنشارك مع الهيئة خلال 24 ساعة.") + '</p><div class="row"><button class="btn primary" data-act="doIssue" id="doIssueBtn">تأكيد وإصدار</button><button class="btn" data-act="noIssue">رجوع</button></div></div>';
+  } else {
+    h += '<button class="btn primary" style="width:100%;padding:11px" data-act="askIssue"' + (can ? "" : " disabled") + ">إصدار " + (S.draft.docType === "invoice" ? (S.draft.kind === "standard" ? "الفاتورة الضريبية" : "الفاتورة المبسطة") : ZE.DOC[S.draft.docType].ar) + "</button>";
+    if (!egs()) h += '<p class="small muted">فعّل الربط مع الهيئة أول.</p>';
+  }
+  side.innerHTML = h;
+}
+function afterNewRender() { refreshNewSide(); }
+function refreshLines() { var el = $("#lines"); if (!el) return; var a = document.activeElement, aid = a && a.id, pos = a && a.selectionStart; el.innerHTML = linesHtml(); if (aid) { var n = document.getElementById(aid); if (n) { n.focus(); try { if (pos != null) n.setSelectionRange(pos, pos); } catch (e) {} } } }
+
+/* ----- invoice detail ----- */
+function openDoc(id) {
+  var d = Object.assign({ id: id }, S.docs[id]); if (!S.docs[id]) return;
+  var c = company(), cust = d.customerSnap, e = egs();
+  var qrSvg = "";
+  try { var q = qrcode(0, "M"); q.addData(d.qr); q.make(); qrSvg = q.createSvgTag({ cellSize: 2, margin: 2, scalable: true }); } catch (err) { qrSvg = '<p class="small">تعذر رسم الرمز</p>'; }
+  var title = d.docType === "invoice" ? (d.kind === "standard" ? ["فاتورة ضريبية", "Tax Invoice"] : ["فاتورة ضريبية مبسطة", "Simplified Tax Invoice"]) : [ZE.DOC[d.docType].ar, ZE.DOC[d.docType].en];
+  var sigOk = verifySig(d);
+  var hashOk = ZE.invoiceHash(ZE.stripForHash(d.xml)) === d.hash;
+  var bal = balanceOf(d), p = payState(d);
+  var paper = '<div class="paper"><div class="ph"><div><h2>' + title[0] + '</h2><div class="en">' + title[1] + '</div></div><div style="text-align:left"><div class="num" style="font-size:1rem;font-weight:600">' + esc(d.number) + '</div><div class="small">تاريخ الإصدار: <span class="num">' + d.issueDate + " " + d.issueTime + '</span></div><div class="small">تاريخ التوريد: <span class="num">' + esc(d.supplyDate) + "</span></div>" + (d.refNumber ? '<div class="small">مرجع الفاتورة: <span class="num">' + esc(d.refNumber) + "</span></div>" : "") + "</div></div>" +
+    '<div class="parties"><div class="pbox"><b>البائع · Seller</b>' + esc(c ? c.nameAr : "") + '<br><span class="small">الرقم الضريبي: <span class="num">' + esc(c ? c.vat : "") + '</span></span><br><span class="small">السجل التجاري: <span class="num">' + esc(c ? c.cr : "") + '</span></span><br><span class="small">' + esc(c ? [c.street, c.building, c.district, c.city, c.postal].filter(Boolean).join("، ") : "") + "</span></div>" +
+    '<div class="pbox"><b>المشتري · Buyer</b>' + (cust ? esc(cust.name) + (cust.vat ? '<br><span class="small">الرقم الضريبي: <span class="num">' + esc(cust.vat) + "</span></span>" : "") + (cust.otherId ? '<br><span class="small">السجل التجاري: <span class="num">' + esc(cust.otherId) + "</span></span>" : "") + '<br><span class="small">' + esc([cust.street, cust.building, cust.district, cust.city, cust.postal].filter(Boolean).join("، ")) + "</span>" : "عميل نقدي") + "</div></div>" +
+    '<div class="tbl" style="border-color:#e3e8e6;background:#fff"><table><thead><tr><th>#</th><th>البيان</th><th>الكمية</th><th>السعر</th><th>الخصم</th><th>الضريبة</th><th>الإجمالي</th></tr></thead><tbody>' +
+    d.lines.map(function (l, i) { var lt = d.totals.lines[i]; return "<tr><td>" + (i + 1) + '</td><td class="wrap-cell">' + esc(l.name) + (l.cat !== "S" ? '<br><span class="small" style="color:#5d6b69">' + ZE.CAT_NAMES[l.cat] + (l.reason ? " · " + esc(ZE.EXEMPTIONS[l.reason] || l.reason) : "") + "</span>" : "") + '</td><td class="num">' + l.qty + '</td><td class="num">' + money(l.price) + '</td><td class="num">' + money(l.discount) + '</td><td class="num">' + money(lt.vat) + '</td><td class="num">' + money(lt.gross) + "</td></tr>"; }).join("") +
+    '</tbody></table></div><div class="totals"><div class="qr">' + qrSvg + '</div><div class="sum"><span>الإجمالي قبل الضريبة</span><span>' + sar(d.totals.net) + "</span><span>ضريبة القيمة المضافة</span><span>" + sar(d.totals.vat) + '</span><span class="t">الإجمالي المستحق</span><span class="t">' + sar(d.totals.gross) + "</span></div></div>" +
+    (d.reason ? '<p class="small"><b>سبب الإشعار:</b> ' + esc(d.reason) + "</p>" : "") + (d.notes ? '<p class="small">' + esc(d.notes) + "</p>" : "") +
+    '<div class="stamp">UUID ' + d.uuid + " · ICV " + d.icv + "<br>Hash " + esc(d.hash) + "</div></div>";
+  var side = '<div class="stack"><div class="card"><h3>حالة الهيئة</h3><div class="row">' + zatcaPill(d) + '<span class="pill info plain">محاكاة</span></div><p class="small muted">' + (d.zatca.status === "cleared" ? "اعتُمدت الفاتورة قبل تسليمها للعميل" : d.zatca.status === "reported" ? "تمت مشاركتها " + fmtDT(d.zatca.at) : "بتنشارك تلقائياً خلال ثواني (المهلة النظامية 24 ساعة)") + "</p>" + (d.zatca.warnings && d.zatca.warnings.length ? '<ul class="checks">' + d.zatca.warnings.map(function (w) { return '<li><span class="ic w">؟</span><span class="small">' + esc(w) + "</span></li>"; }).join("") + "</ul>" : "") +
+    '<ul class="checks" style="margin-top:8px"><li><span class="ic ' + (hashOk ? "o" : "e") + '">' + (hashOk ? "✓" : "!") + '</span><span class="small">البصمة مطابقة لمحتوى XML</span></li><li><span class="ic ' + (sigOk ? "o" : "e") + '">' + (sigOk ? "✓" : "!") + '</span><span class="small">' + (sigOk ? "التوقيع الرقمي صحيح" : "التوقيع غير صحيح") + "</span></li></ul></div>";
+  if (d.docType === "invoice") {
+    side += '<div class="card"><h3>السداد</h3><div class="row" style="justify-content:space-between"><span class="pill ' + p.k + '">' + p.t + '</span><span class="small">المتبقي ' + sar(Math.max(0, bal)) + "</span></div>" + ((d.payments || []).length ? '<ul class="small" style="padding-inline-start:18px;margin:8px 0">' + d.payments.map(function (x) { return "<li>" + sar(x.amount) + " · " + esc(x.method) + " · " + fmtDate(x.at) + "</li>"; }).join("") + "</ul>" : "") +
+      (bal > 0.004 ? '<div class="stack" style="gap:8px;margin-top:10px"><label class="f"><span>مبلغ الدفعة</span><input class="in num" id="payAmt" inputmode="decimal" value="' + ZE.f2(bal) + '"></label><label class="f"><span>طريقة الدفع</span><select class="in" id="payMethod"><option>تحويل بنكي</option><option>مدى</option><option>نقداً</option><option>Apple Pay</option></select></label><button class="btn" data-act="pay" data-id="' + id + '">تسجيل الدفعة</button></div>' : "") + "</div>";
+  }
+  var wa = "https://wa.me/" + (cust && cust.phone ? String(cust.phone).replace(/\D/g, "") : "") + "?text=" + encodeURIComponent((c ? c.nameAr : "") + "\n" + title[0] + " رقم " + d.number + "\nالإجمالي: " + money(d.totals.gross) + " ر.س" + (d.dueDate ? "\nتاريخ الاستحقاق: " + d.dueDate : ""));
+  side += '<div class="card"><h3>إجراءات</h3><div class="stack" style="gap:8px"><button class="btn" data-act="dlxml" data-id="' + id + '">تنزيل ملف XML</button><a class="btn" href="' + esc(wa) + '" target="_blank" rel="noopener">إرسال عبر واتساب</a>' +
+    (d.docType === "invoice" ? '<button class="btn" data-act="note" data-type="credit" data-id="' + id + '">إصدار إشعار دائن</button><button class="btn" data-act="note" data-type="debit" data-id="' + id + '">إصدار إشعار مدين</button>' : "") + '<button class="btn ghost" data-act="toggleXml">عرض XML</button></div><p class="small muted" style="margin-bottom:0">ما فيه تعديل أو حذف للمستند الصادر. هذا متطلب نظامي.</p></div>';
+  side += '<div class="card"><h3>بيانات التشفير</h3><dl class="kv"><dt>UUID</dt><dd class="code">' + d.uuid + '</dd><dt>ICV</dt><dd class="num">' + d.icv + '</dd><dt>PIH</dt><dd class="code">' + esc(d.pih) + '</dd><dt>Hash</dt><dd class="code">' + esc(d.hash) + "</dd></dl></div></div>";
+  $("#modal").innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(d.number) + '"><div class="sheet-head"><b class="num" style="font-size:1.05rem">' + esc(d.number) + "</b>" + zatcaPill(d) + '<span class="spacer" style="flex:1"></span><button class="btn" data-act="close" id="closeModal">إغلاق</button></div><div class="sheet-body"><div class="stack" style="min-width:0">' + paper + '<pre class="xml" id="xmlView" hidden>' + esc(d.xml) + "</pre></div>" + side + "</div></div>";
+  $("#modal").hidden = false; S.openId = id;
+  setTimeout(function () { var b = $("#closeModal"); if (b) b.focus(); }, 0);
+}
+function closeModal() { $("#modal").hidden = true; $("#modal").innerHTML = ""; S.openId = null; }
+
+/* ----- customers & products ----- */
+VIEWS.customers = function () {
+  S.rendered = "customers";
+  var cs = customers(), ed = S.editCust;
+  var h = '<div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(280px,380px);align-items:start"><div>';
+  if (!cs.length) h += '<div class="card empty"><h3>ما أضفت عملاء للحين</h3><p>العميل في الفاتورة الضريبية يحتاج اسم ورقم ضريبي وعنوان وطني كامل.</p></div>';
+  else h += '<div class="tbl"><table><thead><tr><th>العميل</th><th>الرقم الضريبي</th><th>المدينة</th><th>الرصيد المستحق</th><th></th></tr></thead><tbody>' + cs.map(function (x) {
+    var bal = documents().filter(function (d) { return d.customerId === x.id && d.docType === "invoice"; }).reduce(function (s, d) { return s + Math.max(0, balanceOf(d)); }, 0);
+    return "<tr><td>" + esc(x.name) + (x.type === "individual" ? ' <span class="pill plain">فرد</span>' : "") + '</td><td class="num">' + esc(x.vat || "—") + "</td><td>" + esc(x.city || "—") + "</td><td>" + sar(bal) + '</td><td><button class="btn ghost" data-act="editCust" data-id="' + x.id + '">تعديل</button></td></tr>';
+  }).join("") + "</tbody></table></div>";
+  h += "</div>" + entityForm("cust", ed, [["name", "اسم العميل", true], ["vat", "الرقم الضريبي (15 رقم)"], ["otherId", "السجل التجاري"], ["phone", "جوال (للواتساب)"], ["email", "البريد"], ["street", "الشارع"], ["building", "رقم المبنى (4 أرقام)"], ["district", "الحي"], ["city", "المدينة"], ["postal", "الرمز البريدي (5 أرقام)"]]) + "</div>";
+  return h;
+};
+VIEWS.products = function () {
+  S.rendered = "products";
+  var ps = products(), ed = S.editProd;
+  var h = '<div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(280px,380px);align-items:start"><div>';
+  if (!ps.length) h += '<div class="card empty"><h3>ما أضفت منتجات للحين</h3><p>أضف منتجاتك وخدماتك بأسعارها عشان تختارها بسرعة في الفاتورة.</p></div>';
+  else h += '<div class="tbl"><table><thead><tr><th>المنتج أو الخدمة</th><th>السعر</th><th>الضريبة</th><th></th></tr></thead><tbody>' + ps.map(function (x) { return "<tr><td>" + esc(x.name) + "</td><td>" + sar(x.price) + "</td><td>" + ZE.CAT_NAMES[x.cat || "S"] + '</td><td><button class="btn ghost" data-act="editProd" data-id="' + x.id + '">تعديل</button></td></tr>'; }).join("") + "</tbody></table></div>";
+  h += "</div>" + entityForm("prod", ed, [["name", "الاسم", true], ["price", "السعر قبل الضريبة", true], ["cat", "الضريبة"], ["reason", "سبب الإعفاء"]]) + "</div>";
+  return h;
+};
+function entityForm(kind, id, fields) {
+  var o = id ? S.docs[id] || {} : {};
+  var h = '<form class="card" id="form-' + kind + '" data-kind="' + kind + '"><h2>' + (id ? "تعديل" : "إضافة") + (kind === "cust" ? " عميل" : " منتج أو خدمة") + '</h2><div class="stack" style="gap:10px">';
+  if (kind === "cust") h += '<label class="f"><span>النوع</span><select class="in" id="cust-type" name="type"><option value="business"' + (o.type !== "individual" ? " selected" : "") + '>منشأة</option><option value="individual"' + (o.type === "individual" ? " selected" : "") + ">فرد</option></select></label>";
+  fields.forEach(function (f) {
+    if (f[0] === "cat") { h += '<label class="f"><span>الضريبة</span><select class="in" id="prod-cat" name="cat">' + ["S", "Z", "E", "O"].map(function (k) { return '<option value="' + k + '"' + ((o.cat || "S") === k ? " selected" : "") + ">" + ZE.CAT_NAMES[k] + "</option>"; }).join("") + "</select></label>"; return; }
+    if (f[0] === "reason") { h += '<label class="f"><span>سبب الإعفاء (إذا غير خاضع 15%)</span><select class="in" id="prod-reason" name="reason"><option value="">—</option>' + Object.keys(ZE.EXEMPTIONS).map(function (k) { return '<option value="' + k + '"' + (o.reason === k ? " selected" : "") + ">" + ZE.EXEMPTIONS[k] + "</option>"; }).join("") + "</select></label>"; return; }
+    h += '<label class="f"><span' + (f[2] ? ' class="req"' : "") + ">" + f[1] + '</span><input class="in" id="' + kind + "-" + f[0] + '" name="' + f[0] + '" value="' + esc(o[f[0]] == null ? "" : o[f[0]]) + '"' + (f[2] ? " required" : "") + "></label>";
+  });
+  h += '<div class="row"><button class="btn primary" type="submit">حفظ</button>' + (id ? '<button class="btn" type="button" data-act="cancelEdit">إلغاء</button>' : "") + '</div><p class="small muted" id="' + kind + '-msg"></p></div></form>';
+  return h;
+}
+
+/* ----- reports ----- */
+VIEWS.reports = function () {
+  var per = S.ui.period, v = vatSummary(per), docs = documents();
+  var seg = '<div class="seg" role="group">' + [["month", "هذا الشهر"], ["quarter", "هذا الربع"], ["year", "هذه السنة"]].map(function (o) { return '<button type="button" data-act="period" data-v="' + o[0] + '" aria-pressed="' + (per === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div>";
+  var h = '<div class="row" style="justify-content:space-between;margin-bottom:14px">' + seg + '<button class="btn" data-act="csv">تصدير CSV</button></div>';
+  h += '<div class="grid g2"><div class="card"><h2>مسودة إقرار ضريبة القيمة المضافة (المبيعات)</h2><div class="tbl"><table><thead><tr><th>البند</th><th>المبلغ</th><th>الضريبة</th></tr></thead><tbody>' +
+    "<tr><td>المبيعات الخاضعة للنسبة الأساسية 15%</td><td>" + sar(v.rows.S.base) + "</td><td>" + sar(v.rows.S.vat) + "</td></tr>" +
+    "<tr><td>المبيعات الخاضعة للنسبة الصفرية</td><td>" + sar(v.rows.Z.base) + "</td><td>" + sar(0) + "</td></tr>" +
+    "<tr><td>المبيعات المعفاة</td><td>" + sar(v.rows.E.base) + "</td><td>" + sar(0) + "</td></tr>" +
+    "<tr><td>خارج نطاق الضريبة</td><td>" + sar(v.rows.O.base) + "</td><td>" + sar(0) + "</td></tr>" +
+    "<tr><td>تعديلات (إشعارات دائنة)</td><td>" + sar(v.adj.base) + "</td><td>" + sar(v.adj.vat) + "</td></tr>" +
+    '<tr><td><b>إجمالي ضريبة المخرجات</b></td><td></td><td><b>' + sar(v.outputVat) + "</b></td></tr></tbody></table></div>" +
+    '<p class="small muted">مبني على ' + v.count + " مستند صادر في الفترة. المشتريات وضريبة المدخلات تنضاف في وحدة المشتريات. راجع الأرقام مع محاسبك قبل تقديم الإقرار.</p></div>";
+  var buckets = [0, 0, 0, 0], today = Date.parse(riyadhNow().date);
+  docs.forEach(function (d) { if (d.docType !== "invoice") return; var b = balanceOf(d); if (b <= 0.004) return; var age = Math.floor((today - Date.parse(d.dueDate || d.issueDate)) / 864e5); buckets[age <= 0 ? 0 : age <= 30 ? 1 : age <= 60 ? 2 : 3] += b; });
+  var labels = ["لم تستحق", "متأخرة 1–30 يوم", "متأخرة 31–60 يوم", "متأخرة أكثر من 60 يوم"], mx = Math.max.apply(null, buckets.concat([1]));
+  h += '<div class="card"><h2>أعمار الذمم المدينة</h2><div class="bars">' + buckets.map(function (b, i) { return '<div class="bar"><span>' + labels[i] + '</span><span class="num">' + money(b) + '</span><div class="track"><div class="fill" style="width:' + (b ? Math.max(3, b / mx * 100) : 0) + "%;" + (i >= 2 ? "background:var(--bad)" : i === 1 ? "background:var(--gold)" : "") + '"></div></div></div>'; }).join("") + "</div></div></div>";
+  return h;
+};
+
+/* ----- audit ----- */
+VIEWS.audit = function () {
+  var en = auditEntries();
+  var NAMES = { "doc.issue": "إصدار مستند", "zatca.report": "مشاركة مع الهيئة", "egs.onboard": "تسجيل وحدة إصدار", "company.save": "تعديل بيانات المنشأة", "cust.save": "حفظ عميل", "prod.save": "حفظ منتج", "pay.add": "تسجيل دفعة", "demo.load": "بيانات تجريبية", "chain.check": "فحص السلسلة" };
+  return '<div class="notice info" style="margin-bottom:14px">كل عملية في النظام تنسجل هنا بطابع زمني، والسجل ما يقبل التعديل من واجهة النظام (متطلب الهيئة: منع العبث بالسجلات).</div>' +
+    (en.length ? '<div class="tbl"><table><thead><tr><th>الوقت</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody>' + en.slice(0, 300).map(function (e) { return "<tr><td>" + fmtDT(e.t) + "</td><td>" + esc(NAMES[e.a] || e.a) + '</td><td class="wrap-cell">' + esc(e.d) + "</td></tr>"; }).join("") + "</tbody></table></div>" : '<div class="card empty"><h3>السجل فاضي</h3><p>أول عملية تسويها بتظهر هنا.</p></div>');
+};
+
+/* ----- plans ----- */
+VIEWS.plans = function () {
+  var y = S.ui.yearly;
+  var P = [
+    ["انطلاقة", 59, "للمنشآت الصغيرة في الموجة 25", ["فواتير وإشعارات بلا حد", "مستخدمين اثنين، ووحدة إصدار وحدة", "عملاء ومنتجات بلا حد", "رابط دفع في الفاتورة", "30 عملية ذكاء اصطناعي شهرياً", "أرشفة 6 سنوات"]],
+    ["نمو", 129, "للشركات اللي تبيع وتشتري", ["كل ميزات انطلاقة", "5 مستخدمين وفرعين", "مشتريات ومصروفات", "فواتير متكررة واشتراكات", "واتساب وتذكيرات تحصيل", "سلة وزد وووكومرس", "200 عملية ذكاء اصطناعي"]],
+    ["احترافي", 249, "للمنشآت اللي تبي نظام متكامل", ["كل ميزات نمو", "15 مستخدم و5 فروع", "مخزون ومستودعات", "وحدة الأقساط وبوابة العميل", "واجهة برمجية API", "ذكاء اصطناعي بلا حد (استخدام معقول)", "بوابة المحاسب"]],
+    ["مؤسسات", 599, "للمجموعات وأنظمة ERP", ["كل ميزات احترافي", "مستخدمين وفروع بلا حد", "شركات متعددة ومجموعة ضريبية", "دخول موحد SSO", "اتفاقية خدمة 99.9%", "مدير حساب خاص"]]
+  ];
+  return '<div class="row" style="justify-content:space-between;margin-bottom:14px"><p class="muted" style="margin:0">أنت في <b>التجربة المجانية</b> (14 يوم، بدون بطاقة). الأسعار بالريال قبل ضريبة القيمة المضافة.</p><div class="seg" role="group"><button type="button" data-act="yearly" data-v="0" aria-pressed="' + !y + '">شهري</button><button type="button" data-act="yearly" data-v="1" aria-pressed="' + !!y + '">سنوي · شهرين مجاناً</button></div></div>' +
+    '<div class="grid g4">' + P.map(function (p, i) { return '<div class="card plan' + (i === 1 ? " hot" : "") + '"><div class="row" style="justify-content:space-between"><h2 style="margin:0">' + p[0] + "</h2>" + (i === 1 ? '<span class="pill acc plain">الأكثر طلباً</span>' : "") + '</div><p class="small muted" style="margin:0">' + p[2] + '</p><div class="price">' + (y ? (p[1] * 10).toLocaleString("en-US") : p[1]) + '</div><div class="small muted">' + (y ? "ريال / سنة" : "ريال / شهر") + (i === 3 ? " · يبدأ من" : "") + "</div><ul>" + p[3].map(function (f) { return "<li>" + f + "</li>"; }).join("") + '</ul><button class="btn' + (i === 1 ? " primary" : "") + '" data-act="subscribe" data-v="' + p[0] + '" style="margin-top:auto">اختر ' + p[0] + "</button></div>"; }).join("") + "</div>" +
+    '<p class="small muted" style="margin-top:12px">الدفع الإلكتروني (مدى وApple Pay وSTC Pay) يتفعّل بعد ربط بوابة الدفع باسم الشركة.</p>';
+};
+
+/* ----- company & onboarding ----- */
+VIEWS.company = function () {
+  S.rendered = "company";
+  var c = company() || {}, e = egs(), errs = ZE.validateCompany(c);
+  var F = [["nameAr", "اسم المنشأة بالعربي", true], ["nameEn", "الاسم بالإنجليزي"], ["vat", "الرقم الضريبي (15 رقم)", true], ["cr", "السجل التجاري (10 أرقام)", true], ["street", "الشارع", true], ["building", "رقم المبنى (4 أرقام)", true], ["district", "الحي", true], ["city", "المدينة", true], ["postal", "الرمز البريدي (5 أرقام)", true], ["phone", "الهاتف"], ["email", "البريد الإلكتروني"]];
+  var h = '<div class="grid g2" style="align-items:start"><form class="card" id="form-company"><h2>بيانات المنشأة</h2><p class="small muted">تظهر في كل فاتورة وفي شهادة التشفير. لازم تطابق بياناتك في الهيئة.</p><div class="fgrid">' +
+    F.map(function (f) { return '<label class="f"><span' + (f[2] ? ' class="req"' : "") + ">" + f[1] + '</span><input class="in" id="co-' + f[0] + '" name="' + f[0] + '" value="' + esc(c[f[0]] || "") + '"></label>'; }).join("") +
+    '</div><div class="row" style="margin-top:14px"><button class="btn primary" type="submit">حفظ البيانات</button>' + (company() ? "" : '<button class="btn" type="button" data-act="demo">أو جرّب ببيانات تجريبية</button>') + '</div><ul class="checks" id="co-errs" style="margin-top:12px">' + (company() ? errs.map(function (x) { return '<li><span class="ic e">!</span><span class="small">' + esc(x.msg) + "</span></li>"; }).join("") : "") + "</ul></form>";
+  h += '<div class="stack"><div class="card"><h2>الربط مع منصة فاتورة</h2>';
+  var ob = S.onboarding;
+  if (ob && ob.done < 5 && !ob.error) {
+    h += '<ul class="steps">' + ob.steps.map(function (s, i) { return '<li><span class="ic ' + (i < ob.done ? "o" : "p") + '" style="width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;flex:none">' + (i < ob.done ? "✓" : i + 1) + "</span><span>" + s + "</span></li>"; }).join("") + "</ul>";
+  } else if (e) {
+    h += '<div class="notice ok"><b>الربط مفعّل.</b> وحدة الإصدار مسجلة وتقدر تصدر فواتير.</div><dl class="kv" style="margin-top:12px"><dt>الرقم التسلسلي</dt><dd class="code">' + esc(e.serial) + "</dd><dt>تاريخ التسجيل</dt><dd>" + fmtDT(e.onboardedAt) + "</dd><dt>صلاحية الشهادة</dt><dd>" + fmtDate(e.expiresAt) + '</dd><dt>المفتاح العام</dt><dd class="code">' + esc(e.pubX.slice(0, 24)) + '…</dd><dt>المفتاح الخاص</dt><dd>محفوظ ولا يُعرض</dd></dl>';
+    if (ob && ob.checks) h += '<h3 style="margin-top:14px">نتيجة فحوصات الامتثال</h3><ul class="checks">' + ob.checks.map(function (k) { return '<li><span class="ic ' + (k.ok ? "o" : "e") + '">' + (k.ok ? "✓" : "!") + "</span><span>" + esc(k.name) + "</span></li>"; }).join("") + "</ul>";
+    h += '<details style="margin-top:12px"><summary class="small">تجديد الشهادة</summary><div class="row" style="margin-top:8px"><input class="in num" id="otp" inputmode="numeric" maxlength="6" placeholder="رمز OTP" style="width:140px"><button class="btn" data-act="onboard">تجديد</button></div><p class="small muted">التجديد يولّد مفتاح جديد ويكمّل نفس سلسلة الفواتير.</p></details>';
+  } else {
+    if (ob && ob.error) h += '<div class="notice bad">ما اكتمل التسجيل: ' + esc(ob.error) + "</div>";
+    h += '<ol class="small" style="padding-inline-start:20px"><li>ادخل على بوابة فاتورة (fatoora.zatca.gov.sa) بحساب منشأتك</li><li>اختر «تسجيل وحدة حل جديدة» وولّد رمز OTP</li><li>الصق الرمز هنا خلال ساعة من توليده</li></ol>' +
+      (errs.length ? '<div class="notice warn">كمّل بيانات المنشأة أول (' + errs.length + " ملاحظة).</div>" : "") +
+      '<div class="row" style="margin-top:10px"><label class="f"><span>رمز OTP (6 أرقام)</span><input class="in num" id="otp" inputmode="numeric" maxlength="6" placeholder="123456" style="width:160px"></label><button class="btn primary" data-act="onboard" style="align-self:end"' + (errs.length ? " disabled" : "") + '>سجّل وحدة الإصدار</button></div><p class="small muted">في بيئة المحاكاة أي 6 أرقام تشتغل. المفاتيح والتواقيع حقيقية، والشهادة صادرة من جهة محاكاة.</p>';
+  }
+  h += "</div>";
+  h += '<div class="card"><h3>إعادة ضبط بيئة المحاكاة</h3><p class="small muted">تمسح كل البيانات في هذي البيئة عشان تبدأ من جديد. في بيئة الإنتاج ما فيه حذف للفواتير أبداً.</p>' + (S.confirmReset ? '<div class="row"><button class="btn danger" data-act="doReset">امسح كل بيانات المحاكاة</button><button class="btn" data-act="noReset">رجوع</button></div>' : '<button class="btn danger" data-act="askReset"' + (Object.keys(S.docs).length ? "" : " disabled") + ">إعادة الضبط</button>") + "</div></div></div>";
+  return h;
+};
+
+/* ----- assistant ----- */
+VIEWS.assistant = function () {
+  S.rendered = "assistant";
+  if (S.sample === null) return '<div class="card empty"><h3>المساعد الذكي غير متاح هنا</h3><p>افتح الصفحة داخل Claude وأنت مسجل دخول عشان يشتغل المساعد.</p></div>';
+  var h = '<div class="card" style="max-width:860px"><div class="chat" id="chat">';
+  if (!S.chat.length) h += '<div class="msg a">هلا! أنا مساعدك المالي في زيمارا. أقدر أقرأ فواتيرك وعملاءك وأحسب لك الضريبة، وأجهز لك مسودات فواتير. وش تبي تعرف؟</div>';
+  S.chat.forEach(function (m) { h += '<div class="msg ' + (m.role === "user" ? "u" : m.role === "tool" ? "tool" : "a") + '">' + esc(m.content) + "</div>"; });
+  if (S.chatBusy) h += '<div class="msg a" id="streaming">' + esc(S.streamText || "أفكر…") + "</div>";
+  h += "</div>";
+  if (S.pendingDraft) h += '<div class="notice ok" style="margin-top:12px">جهزت لك مسودة فاتورة. <button class="btn primary" data-act="openDraft">افتح المسودة وراجعها</button></div>';
+  if (!S.chat.length) h += '<div class="chips" style="margin-top:14px">' + ["كم الضريبة المستحقة علي هذا الربع؟", "مين العملاء المتأخرين بالسداد؟", "لخص لي مبيعات هذا الشهر", "جهز فاتورة لأكبر عميل بساعتين استشارة"].map(function (q) { return '<button class="chip" data-act="ask" data-q="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>";
+  h += '<form id="chatForm" class="row" style="margin-top:14px;align-items:stretch"><input class="in" id="chatIn" placeholder="اكتب سؤالك…" style="flex:1;min-width:200px"' + (S.chatBusy ? " disabled" : "") + '><button class="btn primary" type="submit"' + (S.chatBusy ? " disabled" : "") + ">إرسال</button></form></div>";
+  return h;
+};
+function scrollChat() { var c = $("#chat"); if (c) c.lastElementChild && c.lastElementChild.scrollIntoView({ block: "nearest" }); }
+
+/* ---------- AI ---------- */
+function ctxCustomers() { return customers().map(function (c) { return { id: c.id, name: c.name, vat: c.vat || "", type: c.type || "business" }; }); }
+function ctxProducts() { return products().map(function (p) { return { id: p.id, name: p.name, price: p.price, cat: p.cat || "S", reason: p.reason || "" }; }); }
+function applyAiDraft(r) {
+  var d = newDraft();
+  if (r.kind === "simplified" || r.kind === "standard") d.kind = r.kind;
+  if (r.customerId && S.docs[r.customerId]) d.customerId = r.customerId;
+  var lines = Array.isArray(r.lines) ? r.lines : [];
+  d.lines = lines.slice(0, 30).map(function (l) {
+    var p = l.productId && S.docs[l.productId] ? S.docs[l.productId] : null;
+    var cat = ["S", "Z", "E", "O"].indexOf(l.cat) > -1 ? l.cat : (p ? p.cat || "S" : "S");
+    return { productId: p ? l.productId : "", name: String(l.name || (p ? p.name : "")), qty: Number(l.qty) > 0 ? Number(l.qty) : 1, price: l.price != null && l.price !== "" ? Number(l.price) : (p ? p.price : ""), discount: Number(l.discount) > 0 ? Number(l.discount) : 0, cat: cat, reason: cat !== "S" ? (l.reason || (p && p.reason) || "") : "", unit: p ? p.unit || "PCE" : "PCE" };
+  });
+  if (!d.lines.length) d.lines = [blankLine()];
+  if (r.notes) d.notes = String(r.notes);
+  return d;
+}
+async function aiFill() {
+  var txt = ($("#aiText") || {}).value || ""; if (!txt.trim() || !S.sample) return;
+  var btn = $("#aiFillBtn"), note = $("#aiNote"); btn.disabled = true; note.textContent = "أجهز المسودة…";
+  var prompt = "أنت مساعد فوترة سعودي داخل نظام زيمارا. حوّل طلب المستخدم إلى مسودة فاتورة.\nالعملاء المتاحين (JSON): " + JSON.stringify(ctxCustomers()) + "\nالمنتجات المتاحة (JSON): " + JSON.stringify(ctxProducts()) +
+    '\nرد بـ JSON فقط بهذا الشكل: {"kind":"standard أو simplified","customerId":"معرّف العميل من القائمة أو فاضي","customerName":"اسم العميل إذا ما لقيته في القائمة","lines":[{"productId":"معرّف المنتج أو فاضي","name":"","qty":1,"price":0,"discount":0,"cat":"S|Z|E|O"}],"notes":""}\n' +
+    "القواعد: الفاتورة الضريبية (standard) للمنشآت، والمبسطة (simplified) للأفراد أو البيع النقدي. استخدم سعر المنتج من القائمة إذا المستخدم ما حدد سعر. الأسعار قبل الضريبة. الخصم مبلغ بالريال على البند.\nطلب المستخدم: " + txt;
+  try {
+    var r = await S.sample.json(prompt, { modelTier: "default" });
+    S.draft = applyAiDraft(r || {});
+    S.confirmIssue = false;
+    renderView();
+    var n = $("#aiNote"); if (n) n.textContent = (r && r.customerName && !r.customerId ? "ما لقيت العميل «" + r.customerName + "» في القائمة. أضفه من صفحة العملاء. " : "") + "جهزت المسودة. راجع البنود قبل الإصدار.";
+  } catch (e) {
+    note.textContent = e && e.code === "not_granted" ? "ما انسمح للمساعد بالعمل. فعّله من صلاحيات الصفحة." : e && e.code === "rate_limited" ? "وصلت حد الاستخدام مؤقتاً. حاول بعد شوي." : "ما قدرت أفهم الطلب. جرّب تكتبه بتفاصيل أكثر.";
+    btn.disabled = false;
+  }
+}
+async function aiExplain() {
+  var el = $("#aiExplain"); if (!el || !S.sample) return;
+  var issues = currentIssues(); el.textContent = "…";
+  try {
+    var r = await S.sample("أنت خبير فوترة إلكترونية سعودية. اشرح للمستخدم بلهجة سعودية بسيطة وباختصار (نقاط قصيرة) وش يعني كل خطأ وكيف يصلحه في الشاشة. لا تستخدم Markdown.\nالأخطاء: " + JSON.stringify(issues.map(function (x) { return x.code + ": " + x.msg; })), { modelTier: "quick", onText: function (u) { el.textContent = u.text; } });
+    el.textContent = r.text;
+  } catch (e) { el.textContent = "ما قدرت أجيب الشرح الحين."; }
+}
+var AI_TOOLS = function () {
+  return [
+    { name: "get_overview", description: "يرجع ملخص المنشأة: المبيعات هذا الشهر، المستحقات غير المحصلة، عدد المستندات، حالة الربط مع الهيئة.", execute: function () {
+      var docs = documents(), n = riyadhNow();
+      return { company: company() ? company().nameAr : null, linked: !!egs(), docs: docs.length, salesThisMonth: ZE.r2(docs.filter(function (d) { return d.issueDate.slice(0, 7) === n.ym; }).reduce(function (s, d) { return s + (d.docType === "credit" ? -d.totals.gross : d.totals.gross); }, 0)), unpaid: ZE.r2(docs.filter(function (d) { return d.docType === "invoice"; }).reduce(function (s, d) { return s + Math.max(0, balanceOf(d)); }, 0)), today: n.date };
+    } },
+    { name: "list_documents", description: "يرجع قائمة المستندات (الأحدث أولاً) مع العميل والإجمالي وحالة السداد وحالة الهيئة. فلتر اختياري: status = unpaid أو overdue أو all.", inputSchema: { type: "object", properties: { status: { type: "string", enum: ["all", "unpaid", "overdue"] }, limit: { type: "number" } } }, execute: function (i) {
+      var st = String(i.status || "all"), lim = Math.min(50, Number(i.limit) || 20);
+      return documents().filter(function (d) { var p = payState(d); if (st === "unpaid") return p && p.k !== "ok"; if (st === "overdue") return p && p.k === "bad"; return true; }).slice(0, lim).map(function (d) { var p = payState(d); return { number: d.number, type: docLabel(d), customer: d.customerSnap ? d.customerSnap.name : "عميل نقدي", gross: d.totals.gross, vat: d.totals.vat, balance: d.docType === "invoice" ? balanceOf(d) : 0, payment: p ? p.t : null, dueDate: d.dueDate, zatca: d.zatca.status }; });
+    } },
+    { name: "get_vat_summary", description: "يحسب ملخص ضريبة القيمة المضافة على المبيعات للفترة: month أو quarter أو year.", inputSchema: { type: "object", properties: { period: { type: "string", enum: ["month", "quarter", "year"] } } }, execute: function (i) { var v = vatSummary(["month", "quarter", "year"].indexOf(i.period) > -1 ? i.period : "quarter"); return { standardBase: v.rows.S.base, standardVat: v.rows.S.vat, zeroRated: v.rows.Z.base, exempt: v.rows.E.base, creditAdjustVat: v.adj.vat, totalOutputVat: v.outputVat, documents: v.count }; } },
+    { name: "list_customers_products", description: "يرجع العملاء (id, name) والمنتجات (id, name, price, cat). استخدمه قبل تجهيز مسودة.", execute: function () { return { customers: ctxCustomers(), products: ctxProducts() }; } },
+    { name: "prepare_invoice_draft", description: "يجهز مسودة فاتورة (ما يصدرها). المستخدم يراجعها ويصدرها بنفسه. kind: standard للمنشآت أو simplified للأفراد. lines: بنود فيها productId اختياري و name و qty و price (قبل الضريبة) و cat.", inputSchema: { type: "object", properties: { kind: { type: "string", enum: ["standard", "simplified"] }, customerId: { type: "string" }, lines: { type: "array", items: { type: "object", properties: { productId: { type: "string" }, name: { type: "string" }, qty: { type: "number" }, price: { type: "number" }, cat: { type: "string" } } } }, notes: { type: "string" } }, required: ["lines"] }, execute: function (i) { S.pendingDraft = applyAiDraft(i); return "تم تجهيز المسودة. قل للمستخدم يضغط زر «افتح المسودة» ويراجعها قبل الإصدار."; } }
+  ];
+};
+async function ask(q) {
+  if (!q.trim() || S.chatBusy || !S.sample) return;
+  S.chat.push({ role: "user", content: q }); S.chatBusy = true; S.streamText = ""; renderView();
+  var intro = "أنت المساعد المالي داخل نظام زيمارا للفوترة الإلكترونية السعودية. تكلم بلهجة سعودية مهذبة وواضحة وباختصار، بدون Markdown. استخدم الأدوات لقراءة بيانات المستخدم الحقيقية ولا تخترع أرقام. المبالغ بالريال السعودي. لا تصدر فواتير، فقط جهز مسودات بأداة prepare_invoice_draft. إذا سُئلت عن أمور نظامية، اذكر أن المرجع هو هيئة الزكاة والضريبة والجمارك.\n\n";
+  var msgs = S.chat.filter(function (m) { return m.role === "user" || m.role === "assistant"; }).map(function (m, i) { return { role: m.role, content: i === 0 ? intro + m.content : m.content }; });
+  try {
+    var r = await S.sample(msgs, { tools: AI_TOOLS(), cache: false, onText: function (u) { S.streamText = u.text; var el = $("#streaming"); if (el) { el.textContent = u.text; scrollChat(); } } });
+    S.chat.push({ role: "assistant", content: r.text || "تم." });
+  } catch (e) {
+    S.chat.push({ role: "assistant", content: e && e.code === "rate_limited" ? "وصلت حد الاستخدام مؤقتاً. حاول بعد شوي." : e && e.code === "not_granted" ? "ما انسمح للمساعد بالعمل. فعّله من صلاحيات الصفحة." : "صار خطأ وما قدرت أكمل. حاول مرة ثانية." });
+  }
+  S.chatBusy = false; S.streamText = ""; renderView();
+  var inp = $("#chatIn"); if (inp) inp.focus();
+}
+
+/* ---------- export ---------- */
+async function saveFile(name, data) {
+  if (S.dl) { try { await S.dl.save({ filename: name, data: data }); toast("تم حفظ الملف"); return; } catch (e) { if (e && e.code === "cancelled") return; } }
+  toast("التنزيل غير متاح هنا. استخدم «عرض XML» وانسخ المحتوى", "bad");
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", function (ev) {
+  var t = ev.target.closest("[data-act]"); if (!t) { if (ev.target.id === "modal") closeModal(); return; }
+  var act = t.getAttribute("data-act"), id = t.getAttribute("data-id");
+  switch (act) {
+    case "demo": t.disabled = true; loadDemo().catch(function (e) { toast(e.message || "تعذر التحميل", "bad"); }); break;
+    case "open": openDoc(id); break;
+    case "close": closeModal(); break;
+    case "toggleXml": var x = $("#xmlView"); x.hidden = !x.hidden; t.textContent = x.hidden ? "عرض XML" : "إخفاء XML"; break;
+    case "dlxml": var dd = S.docs[id]; saveFile(company().vat + "_" + dd.issueDate.replace(/-/g, "") + "T" + dd.issueTime.replace(/:/g, "") + "_" + dd.number + ".xml", dd.xml); break;
+    case "pay":
+      var amt = ZE.r2(Number(($("#payAmt") || {}).value)), bal = balanceOf(Object.assign({ id: id }, S.docs[id]));
+      if (!(amt > 0) || amt > bal + 0.004) { toast("المبلغ لازم يكون أكبر من صفر وما يتجاوز المتبقي", "bad"); break; }
+      var body = clone(S.docs[id]); body.payments = (body.payments || []).concat([{ amount: amt, method: $("#payMethod").value, at: new Date().toISOString() }]);
+      put(id, body).then(function () { return audit("pay.add", body.number + " · " + money(amt) + " ر.س"); }); openDoc(id); renderView(); toast("تم تسجيل الدفعة"); break;
+    case "note":
+      var src = Object.assign({ id: id }, S.docs[id]);
+      S.draft = { docType: t.getAttribute("data-type"), kind: src.kind, customerId: src.customerId, supplyDate: riyadhNow().date, dueDate: "", payMeans: src.payMeans, notes: "", reason: "", refId: id, lines: src.lines.map(function (l) { return clone(l); }) };
+      S.confirmIssue = false; closeModal(); go("new"); break;
+    case "cancelNote": S.draft = null; renderView(); break;
+    case "filter": S.ui[t.getAttribute("data-k")] = t.getAttribute("data-v"); renderView(); break;
+    case "period": S.ui.period = t.getAttribute("data-v"); renderView(); break;
+    case "yearly": S.ui.yearly = t.getAttribute("data-v") === "1"; renderView(); break;
+    case "subscribe": toast("الاشتراك في باقة «" + t.getAttribute("data-v") + "» يتفعّل بعد ربط بوابة الدفع. أنت حالياً في التجربة المجانية"); break;
+    case "kind": S.draft.kind = t.getAttribute("data-v"); if (S.draft.kind === "simplified") S.draft.payMeans = "10"; S.confirmIssue = false; renderView(); break;
+    case "addLine": S.draft.lines.push(blankLine()); refreshLines(); refreshNewSide(); break;
+    case "rmLine": S.draft.lines.splice(Number(t.getAttribute("data-i")), 1); refreshLines(); refreshNewSide(); break;
+    case "askIssue": S.confirmIssue = true; refreshNewSide(); break;
+    case "noIssue": S.confirmIssue = false; refreshNewSide(); break;
+    case "doIssue":
+      t.disabled = true;
+      issue(S.draft).then(function (nid) { S.draft = null; S.confirmIssue = false; go("invoices", function () { openDoc(nid); }); toast("تم إصدار المستند وتوقيعه"); })
+        .catch(function (e) { S.confirmIssue = false; refreshNewSide(); toast(e.message, "bad"); }); break;
+    case "aiFill": aiFill(); break;
+    case "aiExplain": aiExplain(); break;
+    case "editCust": S.editCust = id; renderView(); break;
+    case "editProd": S.editProd = id; renderView(); break;
+    case "cancelEdit": S.editCust = null; S.editProd = null; renderView(); break;
+    case "onboard":
+      var otp = ($("#otp") || {}).value || "";
+      if (!/^\d{6}$/.test(otp)) { toast("رمز OTP لازم يكون 6 أرقام", "bad"); break; }
+      runOnboarding(otp); break;
+    case "chain":
+      var e1 = egs(); S.chainResult = verifyChain(documents().slice().reverse(), e1); audit("chain.check", S.chainResult.ok ? "السلسلة سليمة (" + S.chainResult.checked + ")" : "مشاكل: " + S.chainResult.problems.length); renderView(); break;
+    case "tamper":
+      var asc = documents().slice().reverse(); if (!asc.length) { toast("أصدر فاتورة أول عشان نختبر"); break; }
+      var tgt = asc[Math.floor(asc.length / 2)], r = verifyChain(asc, egs(), tgt.icv); r.tamper = true; r.target = tgt.number; S.chainResult = r; renderView(); break;
+    case "askReset": S.confirmReset = true; renderView(); break;
+    case "noReset": S.confirmReset = false; renderView(); break;
+    case "doReset": S.confirmReset = false; t.disabled = true; resetAll(); break;
+    case "ask": ask(t.getAttribute("data-q")); break;
+    case "openDraft": S.draft = S.pendingDraft; S.pendingDraft = null; S.confirmIssue = false; go("new"); break;
+    case "csv":
+      var rows = [["number", "type", "customer", "issue_date", "net", "vat", "gross", "zatca_status"]].concat(documents().filter(function (d) { return inPeriod(d.issueDate, S.ui.period); }).map(function (d) { return [d.number, docLabel(d), d.customerSnap ? d.customerSnap.name : "عميل نقدي", d.issueDate, d.totals.net, d.totals.vat, (d.docType === "credit" ? -1 : 1) * d.totals.gross, d.zatca.status]; }));
+      saveFile("zimara-sales-" + S.ui.period + ".csv", "﻿" + rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","); }).join("\n")); break;
+  }
+});
+document.addEventListener("keydown", function (ev) {
+  if (ev.key === "Escape" && !$("#modal").hidden) closeModal();
+  if (ev.key === "Enter" && ev.target.matches && ev.target.matches("tr.click")) openDoc(ev.target.getAttribute("data-id"));
+});
+document.addEventListener("input", function (ev) {
+  var t = ev.target;
+  if (t.getAttribute("data-f") === "search") { S.ui.q = t.value; var pos = t.selectionStart; renderView(); var q = $("#q"); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } return; }
+  if (!S.draft) return;
+  var f = t.getAttribute("data-f");
+  if (f) { S.draft[f] = t.value; S.confirmIssue = false; refreshNewSide(); return; }
+  var l = t.getAttribute("data-l");
+  if (l) {
+    var i = Number(t.closest(".line").getAttribute("data-i")), ln = S.draft.lines[i];
+    ln[l] = t.value; S.confirmIssue = false;
+    if (l === "name") { var p = products().filter(function (x) { return x.name === t.value; })[0]; if (p) { ln.productId = p.id; ln.price = p.price; ln.cat = p.cat || "S"; ln.reason = p.reason || ""; ln.unit = p.unit || "PCE"; refreshLines(); } else ln.productId = ""; }
+    if (l === "cat") refreshLines(); else { var lt = ZE.totals(normLines(S.draft.lines)).lines[i], row = t.closest(".line").querySelector(".lt"); if (row && lt) row.innerHTML = "<span>الصافي " + sar(lt.net) + "</span><span>الضريبة " + sar(lt.vat) + "</span><span>الإجمالي " + sar(lt.gross) + "</span>"; }
+    refreshNewSide();
+  }
+});
+document.addEventListener("change", function (ev) {
+  if (ev.target.getAttribute("data-f") === "customerId" && S.draft) { S.draft.customerId = ev.target.value; refreshNewSide(); }
+});
+document.addEventListener("submit", function (ev) {
+  ev.preventDefault();
+  var f = ev.target, data = {};
+  Array.prototype.forEach.call(f.elements, function (el) { if (el.name) data[el.name] = el.value.trim(); });
+  if (f.id === "form-company") {
+    var prev = company() || { createdAt: new Date().toISOString() };
+    var next = Object.assign({}, prev, data);
+    if (egs() && (prev.vat !== next.vat)) { toast("ما تقدر تغيّر الرقم الضريبي بعد تسجيل وحدة الإصدار", "bad"); return; }
+    put("company", next).then(function () { return audit("company.save", "تحديث بيانات المنشأة"); });
+    toast(ZE.validateCompany(next).length ? "انحفظت البيانات، وفيه ملاحظات لازم تكمّلها" : "انحفظت بيانات المنشأة"); renderView(true); return;
+  }
+  if (f.id === "chatForm") { var inp = $("#chatIn"); var q = inp.value; inp.value = ""; ask(q); return; }
+  var kind = f.getAttribute("data-kind");
+  if (kind === "cust") {
+    if (!data.name) { $("#cust-msg").textContent = "اسم العميل مطلوب"; return; }
+    if (data.vat && !/^3\d{13}3$/.test(data.vat)) { $("#cust-msg").textContent = "الرقم الضريبي لازم 15 رقم يبدأ وينتهي بـ 3"; return; }
+    var cid = S.editCust || "c_" + rid(); put(cid, data).then(function () { return audit("cust.save", data.name); }); S.editCust = null; toast("انحفظ العميل"); renderView(true); return;
+  }
+  if (kind === "prod") {
+    if (!data.name || !(Number(data.price) >= 0) || data.price === "") { $("#prod-msg").textContent = "الاسم والسعر مطلوبين"; return; }
+    if (data.cat !== "S" && !data.reason) { $("#prod-msg").textContent = "اختر سبب الإعفاء"; return; }
+    data.price = ZE.r2(Number(data.price)); var pid = S.editProd || "p_" + rid(); put(pid, data).then(function () { return audit("prod.save", data.name); }); S.editProd = null; toast("انحفظ المنتج"); renderView(true);
+  }
+});
+window.addEventListener("hashchange", function () { closeModal(); S.confirmReset = false; S.rendered = null; renderView(); window.scrollTo(0, 0); var a = S.after; S.after = null; if (a) a(); });
+
+/* ---------- boot ---------- */
+function afterData() { S.rendered = null; onData(); processQueue(); }
+async function boot() {
+  renderView();
+  if (!window.claude || typeof window.claude.use !== "function") { useLocal(); return; }
+  claude.use("sample").then(function (s) { S.sample = s; if (S.mode !== "loading") onData(); });
+  claude.use("downloads").then(function (d) { S.dl = d; });
+  var db = await claude.use("db"), user = await claude.use("user");
+  var uid = null; try { uid = user ? await user.id() : null; } catch (e) { uid = null; }
+  if (!db || !uid) { useLocal(); return; }
+  S.mode = "db-wait"; S.col = db.collection("data/users/" + uid); renderView();
+  var timer = setTimeout(function () { if (S.mode === "db-wait") { S.note = "slow"; renderView(); } }, 10000);
+  var first = true;
+  S.col.onSnapshot(function (snap) {
+    var m = {}; snap.docs.forEach(function (d) { if (d.exists) m[d.id] = d.data(); });
+    S.docs = m;
+    if (!snap.metadata.fromCache) clearTimeout(timer);
+    S.mode = "db"; if (S.note === "slow" && !snap.metadata.fromCache) S.note = "";
+    if (first) { first = false; afterData(); } else onData();
+  }, function () { clearTimeout(timer); useLocal("ما قدرنا نوصل لحسابك، فالبيانات الحين محفوظة في هذا المتصفح فقط."); });
+}
+boot();
+})();
+
+</script>

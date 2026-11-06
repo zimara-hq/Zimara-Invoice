@@ -6,8 +6,22 @@ import { one, q } from "../db";
 import { hashToken, randomToken } from "./tokens";
 
 const PROD = process.env.NODE_ENV === "production";
-export const SESSION_COOKIE = PROD ? "__Host-zimara_session" : "zimara_session";
+const SECURE_NAME = "__Host-zimara_session";
+const PLAIN_NAME = "zimara_session";
 const DAYS = 30;
+
+/** Secure (__Host-) cookie whenever the request arrived over HTTPS; plain cookie only for local HTTP. */
+async function cookieSpec() {
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto")?.split(",")[0].trim();
+  const secure = PROD && proto !== "http";
+  return { name: secure ? SECURE_NAME : PLAIN_NAME, secure };
+}
+
+async function readToken() {
+  const jar = await cookies();
+  return jar.get(SECURE_NAME)?.value ?? jar.get(PLAIN_NAME)?.value;
+}
 
 export interface SessionUser {
   id: string;
@@ -28,11 +42,12 @@ export async function createSession(userId: string) {
   await q("INSERT INTO sessions(id, user_id, expires_at, ip, user_agent) VALUES ($1,$2, now() + make_interval(days => $3), $4, $5)", [
     hashToken(token), userId, DAYS, await clientIp(), (h.get("user-agent") ?? "").slice(0, 300),
   ]);
-  (await cookies()).set(SESSION_COOKIE, token, { httpOnly: true, secure: PROD, sameSite: "lax", path: "/", maxAge: DAYS * 86400 });
+  const spec = await cookieSpec();
+  (await cookies()).set(spec.name, token, { httpOnly: true, secure: spec.secure, sameSite: "lax", path: "/", maxAge: DAYS * 86400 });
 }
 
 export const currentUser = cache(async (): Promise<SessionUser | null> => {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const token = await readToken();
   if (!token) return null;
   const row = await one<SessionUser & { sid: string }>(
     `UPDATE sessions s SET last_seen_at = now() FROM users u
@@ -51,9 +66,10 @@ export async function requireUser(): Promise<SessionUser> {
 
 export async function destroySession() {
   const jar = await cookies();
-  const token = jar.get(SESSION_COOKIE)?.value;
+  const token = await readToken();
   if (token) await q("DELETE FROM sessions WHERE id = $1", [hashToken(token)]);
-  jar.delete(SESSION_COOKIE);
+  jar.delete(SECURE_NAME);
+  jar.delete(PLAIN_NAME);
 }
 
 export async function destroyAllSessions(userId: string) {

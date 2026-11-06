@@ -18,7 +18,7 @@ const fs = require('fs'), path = require('path');
     await p.goto('http://app.test/');
     await p.waitForTimeout(400);
     if (shots) await p.screenshot({ path: path.join(dir, 'shot-welcome-' + width + '.png') });
-    await p.click('button[data-act="demo"]');
+    await p.click('button[data-act="demoSignup"]');
     await p.waitForFunction(() => document.querySelectorAll('tr.click').length >= 6, null, { timeout: 30000 });
     await p.waitForTimeout(3500);
     if (shots) await p.screenshot({ path: path.join(dir, 'shot-home-' + width + '-' + theme + '.png'), fullPage: true });

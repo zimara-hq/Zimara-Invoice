@@ -241,6 +241,7 @@ function verifyChain(docsAsc, key, mutateIcv) {
 /* ---------- demo data ---------- */
 async function loadDemo() {
   toast("جاري تجهيز بيانات تجريبية…");
+  if (!S.docs.account) await put("account", { name: "مستخدم تجريبي", termsVersion: "2026-11", termsAt: new Date().toISOString(), createdAt: new Date().toISOString(), demo: true });
   await put("company", { nameAr: "مؤسسة الريادة للحلول التقنية (تجريبي)", nameEn: "Al Riyada Tech Solutions (Demo)", vat: "310122393500003", cr: "1010654321", street: "طريق الملك فهد", building: "2451", postal: "12214", city: "الرياض", district: "العليا", phone: "0112345678", email: "billing@example.sa", createdAt: new Date().toISOString(), demo: true });
   var cs = [
     { name: "شركة الأفق للتجارة", type: "business", vat: "300456789100003", otherId: "4030123456", street: "شارع التحلية", building: "7788", postal: "23434", city: "جدة", district: "الروضة", phone: "966500000001" },
@@ -305,13 +306,14 @@ var ROUTES = [
 ];
 function route() { var h = (location.hash || "").replace("#", ""); return ROUTES.some(function (r) { return r[0] === h; }) ? h : "home"; }
 function renderNav() {
-  var r = route(), html = '<div class="brand"><div class="brand-mark">ز</div><div><b>زيمارا</b><small>فوترة إلكترونية سعودية</small></div></div>';
+  var r = route(), html = '<div class="brand"><img src="' + window.ZIMARA_LOGO + '" alt="زيمارا | ZIMARA"></div>';
   ROUTES.forEach(function (x) {
     if (x[0] === "sep") { html += '<div class="sep"></div>'; return; }
     html += '<a href="#' + x[0] + '"' + (x[0] === r ? ' aria-current="page"' : "") + ">" + icon(x[0]) + "<span>" + x[1] + "</span></a>";
   });
   var c = company(); var days = c ? Math.max(0, 14 - Math.floor((Date.now() - Date.parse(c.createdAt || Date.now())) / 864e5)) : 14;
-  html += '<div class="foot">تجربة مجانية · باقي <span class="num">' + days + "</span> يوم<br>بيئة المحاكاة</div>";
+  var acc = S.docs.account || {};
+  html += '<div class="foot"><b>' + esc(c ? c.nameAr : "") + "</b><br>" + esc(acc.name || "") + '<br>تجربة مجانية · باقي <span class="num">' + days + "</span> يوم</div>";
   $("#nav").innerHTML = html;
 }
 function renderPills() {
@@ -334,6 +336,8 @@ function renderView(force) {
     $("#view").innerHTML = '<div class="card"><div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:70%"></div>' + (S.note === "slow" ? '<p class="muted small">التخزين ما رد للحين. تأكد من الاتصال، والصفحة بتكمل التحميل تلقائياً.</p>' : "") + "</div>";
     return;
   }
+  if (!S.docs.account) { showWelcome(); return; }
+  $("#welcome").hidden = true; $("#app").hidden = false;
   var v = VIEWS[r]();
   $("#view").innerHTML = (S.note && S.note !== "slow" ? '<div class="notice warn" style="margin-bottom:14px">' + esc(S.note) + "</div>" : "") + v;
   if (r === "new") afterNewRender();
@@ -343,6 +347,41 @@ function onData() {
   var r = route();
   if (FORM_VIEWS[r] && S.rendered === r) { renderNav(); renderPills(); if (r === "new") refreshNewSide(); return; }
   S.rendered = r; renderView();
+}
+
+function showWelcome() {
+  $("#app").hidden = true;
+  var w = $("#welcome");
+  if (!w.hidden && w.innerHTML) return;
+  w.hidden = false;
+  w.innerHTML = '<div class="welcome"><aside class="side"><img src="' + window.ZIMARA_LOGO + '" alt="زيمارا | ZIMARA">' +
+    '<div><h1>فوترة إلكترونية سعودية، <span class="mist">بذوق أوضح</span></h1><p>فواتير متوافقة مع المرحلة الثانية من هيئة الزكاة والضريبة والجمارك: موقّعة رقمياً، فيها رمز QR، ومربوطة بسلسلة ما تقبل التلاعب.</p></div>' +
+    '<p class="small" style="color:#b6a8cf">Modern technology, distinctly refined. · من حائل</p></aside>' +
+    '<div class="formside"><form id="signupForm" novalidate><h2 style="font-size:1.4rem;margin:0">أنشئ حسابك وابدأ التجربة</h2><p class="muted small" style="margin:0">14 يوم مجاناً، بدون بطاقة ائتمانية.</p>' +
+    '<div class="notice bad" id="su-err" hidden></div>' +
+    '<label class="f"><span class="req">اسمك</span><input class="in" id="su-name" name="name" autocomplete="name"></label>' +
+    '<label class="f"><span class="req">اسم المنشأة</span><input class="in" id="su-company" name="company" autocomplete="organization"></label>' +
+    '<label class="f"><span>البريد الإلكتروني</span><input class="in" id="su-email" name="email" type="email" dir="ltr" autocomplete="email"></label>' +
+    '<label class="f"><span>الجوال</span><input class="in" id="su-phone" name="phone" type="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel"></label>' +
+    '<label class="check"><input type="checkbox" id="su-terms" name="terms"><span>أوافق على الشروط وسياسة الخصوصية، وعلى معالجة بياناتي لتقديم الخدمة.</span></label>' +
+    '<details class="small muted"><summary>ملخص الشروط والخصوصية</summary><ul style="padding-inline-start:18px;margin:6px 0"><li>أنت المكلف النظامي والمسؤول عن صحة بيانات فواتيرك.</li><li>الفواتير الصادرة ما تنحذف ولا تتعدل، والتصحيح بإشعار دائن أو مدين.</li><li>نحفظ الفواتير 6 سنوات على الأقل حسب نظام ضريبة القيمة المضافة.</li><li>نجمع الحد الأدنى من البيانات، ولا نبيعها، ولك حق الوصول والتصحيح والإتلاف حسب نظام حماية البيانات الشخصية.</li><li>هذي بيئة محاكاة: الفواتير موقّعة فعلياً لكن ما تنرسل للهيئة.</li></ul></details>' +
+    '<label class="check"><input type="checkbox" id="su-marketing" name="marketing"><span>أبي توصلني أخبار زيمارا وعروضه (اختياري)</span></label>' +
+    '<button class="btn primary" type="submit" style="padding:11px">إنشاء الحساب</button>' +
+    '<button class="btn" type="button" data-act="demoSignup">أو جرّب مباشرة ببيانات تجريبية</button>' +
+    '<p class="small muted" style="margin:0">' + (S.mode === "db" ? "حسابك مرتبط بحسابك في Claude، وبياناتك خاصة فيك ومحفوظة." : "بياناتك محفوظة في هذا المتصفح فقط.") + "</p></form></div></div>";
+}
+async function createAccount(f) {
+  var err = $("#su-err");
+  var name = f.name.value.trim(), orgName = f.company.value.trim(), email = f.email.value.trim(), phone = f.phone.value.trim();
+  var msg = !name ? "اكتب اسمك" : !orgName ? "اكتب اسم المنشأة" : email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? "البريد الإلكتروني غير صحيح" : phone && !/^(\+?966|0)?5\d{8}$/.test(phone) ? "رقم الجوال غير صحيح" : !f.terms.checked ? "لازم توافق على الشروط وسياسة الخصوصية" : "";
+  if (msg) { err.textContent = msg; err.hidden = false; return; }
+  var now = new Date().toISOString();
+  await put("account", { name: name, email: email, phone: phone, marketing: f.marketing.checked, termsVersion: "2026-11", termsAt: now, createdAt: now });
+  await put("company", Object.assign({}, company() || {}, { nameAr: orgName, email: email, phone: phone, createdAt: now }));
+  await audit("account.signup", "إنشاء الحساب وبدء التجربة المجانية");
+  $("#welcome").hidden = true; $("#welcome").innerHTML = "";
+  go("company");
+  toast("أهلاً " + name.split(" ")[0] + "! كمّل بيانات منشأتك عشان نفعّل الربط مع الهيئة");
 }
 
 var VIEWS = {};
@@ -588,7 +627,7 @@ VIEWS.reports = function () {
 /* ----- audit ----- */
 VIEWS.audit = function () {
   var en = auditEntries();
-  var NAMES = { "doc.issue": "إصدار مستند", "zatca.report": "مشاركة مع الهيئة", "egs.onboard": "تسجيل وحدة إصدار", "company.save": "تعديل بيانات المنشأة", "cust.save": "حفظ عميل", "prod.save": "حفظ منتج", "pay.add": "تسجيل دفعة", "demo.load": "بيانات تجريبية", "chain.check": "فحص السلسلة" };
+  var NAMES = { "account.signup": "إنشاء الحساب", "doc.issue": "إصدار مستند", "zatca.report": "مشاركة مع الهيئة", "egs.onboard": "تسجيل وحدة إصدار", "company.save": "تعديل بيانات المنشأة", "cust.save": "حفظ عميل", "prod.save": "حفظ منتج", "pay.add": "تسجيل دفعة", "demo.load": "بيانات تجريبية", "chain.check": "فحص السلسلة" };
   return '<div class="notice info" style="margin-bottom:14px">كل عملية في النظام تنسجل هنا بطابع زمني، والسجل ما يقبل التعديل من واجهة النظام (متطلب الهيئة: منع العبث بالسجلات).</div>' +
     (en.length ? '<div class="tbl"><table><thead><tr><th>الوقت</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody>' + en.slice(0, 300).map(function (e) { return "<tr><td>" + fmtDT(e.t) + "</td><td>" + esc(NAMES[e.a] || e.a) + '</td><td class="wrap-cell">' + esc(e.d) + "</td></tr>"; }).join("") + "</tbody></table></div>" : '<div class="card empty"><h3>السجل فاضي</h3><p>أول عملية تسويها بتظهر هنا.</p></div>');
 };
@@ -733,6 +772,11 @@ document.addEventListener("click", function (ev) {
   var t = ev.target.closest("[data-act]"); if (!t) { if (ev.target.id === "modal") closeModal(); return; }
   var act = t.getAttribute("data-act"), id = t.getAttribute("data-id");
   switch (act) {
+    case "demoSignup":
+      t.disabled = true;
+      put("account", { name: "مستخدم تجريبي", termsVersion: "2026-11", termsAt: new Date().toISOString(), createdAt: new Date().toISOString(), demo: true })
+        .then(function () { $("#welcome").hidden = true; $("#welcome").innerHTML = ""; return loadDemo(); })
+        .catch(function (e) { toast(e.message || "تعذر التحميل", "bad"); }); break;
     case "demo": t.disabled = true; loadDemo().catch(function (e) { toast(e.message || "تعذر التحميل", "bad"); }); break;
     case "open": openDoc(id); break;
     case "close": closeModal(); break;
@@ -818,6 +862,7 @@ document.addEventListener("submit", function (ev) {
     put("company", next).then(function () { return audit("company.save", "تحديث بيانات المنشأة"); });
     toast(ZE.validateCompany(next).length ? "انحفظت البيانات، وفيه ملاحظات لازم تكمّلها" : "انحفظت بيانات المنشأة"); renderView(true); return;
   }
+  if (f.id === "signupForm") { createAccount(f).catch(function () { toast("ما قدرت أنشئ الحساب. حاول مرة ثانية", "bad"); }); return; }
   if (f.id === "chatForm") { var inp = $("#chatIn"); var q = inp.value; inp.value = ""; ask(q); return; }
   var kind = f.getAttribute("data-kind");
   if (kind === "cust") {
